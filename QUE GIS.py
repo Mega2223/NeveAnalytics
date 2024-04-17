@@ -1,6 +1,8 @@
 import os 
 from os import walk
 import processing
+import datetime
+import calendar
 
 from qgis.core import (QgsVectorLayer, QgsRasterLayer)
 
@@ -47,17 +49,34 @@ def raster_equation_onearg(input_path):
         
     processing.runAndLoadResults('gdal:rastercalculator', parameters)
 
+def parse_date(name):
+    date = name.split("_")[3]
+    date = datetime.datetime(int(date[0:4]),int(date[4:6]), int(date[6:8]), 0,0,0)
+    date = calendar.timegm(date.timetuple())
+    return date
+
 def move_layer(layer,group):
     if layer == None: return
     root = QgsProject.instance().layerTreeRoot()
     mylayer = root.findLayer(layer.id())
     myClone = mylayer.clone()
     parent = mylayer.parent()
-    group.insertChildNode(0, myClone)
-    parent.removeChildNode(mylayer)
     
-def layer_search(upper_layer):
-    l = upper_layer
+    date = parse_date(mylayer.name())
+    i = 0
+    for n in group.findLayers():
+        act = parse_date(n.name())
+        if(date>act): break
+        i+=1
+    
+    group.insertChildNode(i, myClone)
+    parent.removeChildNode(mylayer)
+    return
+    
+    
+    
+def sort(tree):
+    pass
 
 rasters = []
 paths = []
@@ -80,6 +99,8 @@ for path_act in subpaths:
         paths.append(filen)
         i+=1
         pass
+        
+
 
 exp = QgsExpression('1 + 1')
 exp.evaluate()
