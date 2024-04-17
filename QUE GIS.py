@@ -10,13 +10,23 @@ bands = {
     subpaths[0] : ["B2","B5"]
 }
 
+root = QgsProject.instance().layerTreeRoot()
+brute_node = root.addGroup("RAW")
+subpath_nodes = {}
+
+for c in subpaths:
+    cc = brute_node.addGroup(c)
+    bandd = {}
+    for b in bands[c]:
+        bandd.update({str(b):cc.addGroup(str(b))})
+    subpath_nodes.update({c:{"node":cc,"bands:":bands[c],"subgroups":bandd}})
+
 def check_band(subpath_id,band) -> bool :
     for actact in bands[subpath_id]:
             #print(actact + " : " + band)
             if actact == band: return True
     return False
             
-
 def load_raster(path, name = "LAYER"):
     rlayer = QgsRasterLayer(src_path + "/" + path, name)
     if not rlayer.isValid():
@@ -62,25 +72,21 @@ for path_act in subpaths:
         # print(len(properties))
         if (ext != "TIF") or (len(properties) < 9): continue
         band = properties[8].split(".")[0]
-        print("BAND = " + band)
+        #print("BAND = " + band)
         if not check_band(path_act,band): continue
-        rasters.append(load_raster(path_act+"/"+filen, name = filen))
+        r = load_raster(path_act+"/"+filen, name = filen)
+        move_layer(r,subpath_nodes[path_act]['subgroups'][band])
+        rasters.append(r)
         paths.append(filen)
         i+=1
         pass
 
-exp = QgsExpression('1 + 1 = 2')
+exp = QgsExpression('1 + 1')
 exp.evaluate()
 
 #load_raster("/LC08_L1TP_219076_20231218_20240103_02_T1_B4.TIF")
 
 #expression1 = QgsExpression('LC08_L1TP_219076_20231218_20240103_02_T1_B4/3')
-
-root = QgsProject.instance().layerTreeRoot()
-
-brute_node = root.addGroup("RAW")
-for r in rasters:
-    move_layer(r,brute_node)
     
 #g.removeChildNode(h)
 
