@@ -26,6 +26,17 @@ def raster_equation_onearg(input_path):
         
     processing.runAndLoadResults('gdal:rastercalculator', parameters)
 
+def move_layer(layer,group):
+    if layer == None: return
+    root = QgsProject.instance().layerTreeRoot()
+    mylayer = root.findLayer(layer.id())
+    myClone = mylayer.clone()
+    parent = mylayer.parent()
+    group.insertChildNode(0, myClone)
+    parent.removeChildNode(mylayer)
+    
+def layer_search(upper_layer):
+    l = upper_layer
 
 filenames = next(walk(src_path), (None, None, []))[2]
 
@@ -48,8 +59,9 @@ exp.evaluate()
 
 root = QgsProject.instance().layerTreeRoot()
 
-node = root.addGroup("RAW")
-node.insertChildNode(0,rasters[2])
-
+brute_node = root.addGroup("RAW")
+for r in rasters:
+    move_layer(r,brute_node)
+    
 #g.removeChildNode(h)
 
