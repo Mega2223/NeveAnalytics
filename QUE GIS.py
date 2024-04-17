@@ -4,7 +4,18 @@ import processing
 
 from qgis.core import (QgsVectorLayer, QgsRasterLayer)
 
-src_path = "C:/Users/Imperiums/Desktop/UFABC/Dor/SR/QGIS MISC/LANDSAT NOSSO/LC08_L1TP_219076_20231218_20240103_02_T1"
+src_path = "C:/Users/oliveira.sampaio/Desktop/TRABALHO NEVE/BRUTOS"
+subpaths = ["/LANDSAT 4-5"]
+bands = {
+    subpaths[0] : ["B2","B5"]
+}
+
+def check_band(subpath_id,band) -> bool :
+    for actact in bands[subpath_id]:
+            #print(actact + " : " + band)
+            if actact == band: return True
+    return False
+            
 
 def load_raster(path, name = "LAYER"):
     rlayer = QgsRasterLayer(src_path + "/" + path, name)
@@ -38,17 +49,25 @@ def move_layer(layer,group):
 def layer_search(upper_layer):
     l = upper_layer
 
-filenames = next(walk(src_path), (None, None, []))[2]
-
 rasters = []
 paths = []
 i = 0
 
-for filen in filenames:
-    rasters.append(load_raster(filen, name = filen))
-    paths.append(filen)
-    i+=1
-    pass
+for path_act in subpaths:
+    filenames = next(walk(src_path+path_act), (None, None, []))[2]
+    for filen in filenames:
+        ext = filen.split(".")[1]
+        properties = filen.split("_")
+        #print(filen + " -> " + ext)
+        # print(len(properties))
+        if (ext != "TIF") or (len(properties) < 9): continue
+        band = properties[8].split(".")[0]
+        print("BAND = " + band)
+        if not check_band(path_act,band): continue
+        rasters.append(load_raster(path_act+"/"+filen, name = filen))
+        paths.append(filen)
+        i+=1
+        pass
 
 exp = QgsExpression('1 + 1 = 2')
 exp.evaluate()
