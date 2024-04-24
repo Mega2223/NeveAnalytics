@@ -10,10 +10,10 @@ import java.util.Set;
 public class LandsatImage {
     public final String path, name, assossiatedMtlPath;
     public final File file, mtl;
-    TIFFImage image = null;
+    public TIFFImage image = null;
     public final int landsatID, locPath, locRow, band, year, month, day;
     private List<FileDirectory> directories = null;
-    private FileDirectory imgDirectory  = null;
+    public FileDirectory imgDirectory  = null;
     public Rasters raster = null;
     public Set<FileDirectoryEntry> entries  = null;
 

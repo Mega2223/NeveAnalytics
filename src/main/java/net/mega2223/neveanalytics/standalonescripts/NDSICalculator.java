@@ -9,6 +9,9 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class NDSICalculator {
     public static boolean savePNG = false;
@@ -68,11 +71,11 @@ public class NDSICalculator {
         }
         String outName = bandUpper.name.substring(0, bandUpper.name.length() - 7);
         if(savePNG){savePNG(dat, outName);}
-        saveTIFF(dat,outName);
+        saveTIFF(dat,outName,bandLower);
         bandLower.discardBuffer(); bandUpper.discardBuffer();
     }
 
-    public static void saveTIFF(double[][] dat, String name) throws IOException {
+    public static void saveTIFF(double[][] dat, String name, LandsatImage original) throws IOException {
         final int W = dat.length, H = dat[0].length;
         FieldType fieldType = FieldType.FLOAT;
         int bitsPerSample = fieldType.getBits();
@@ -82,6 +85,44 @@ public class NDSICalculator {
         int rowsPerStrip = img.calculateRowsPerStrip(TiffConstants.PLANAR_CONFIGURATION_CHUNKY);
 
         FileDirectory directory = new FileDirectory();
+        directory.setStringEntryValue(FieldTagType.GeoAsciiParams, "-2"); //FIXME
+
+        /*Set<FileDirectoryEntry> ogEntries = original.imgDirectory.getEntries();
+        original.image.getFileDirectories().get(0).addEntry(
+                new FileDirectoryEntry(1,1,1)
+        );
+        for (FileDirectoryEntry act : ogEntries) {
+            String fieldTagName = act.getFieldTag().name();
+            String fieldTypeName = act.getFieldType().name();
+            Object values = act.getValues();
+            switch (fieldTagName){
+                case "GeoKeyDirectory":
+                    directory.setUnsignedIntegerListEntryValue(act.getFieldTag(), (List<Integer>) values);
+                    break;
+                case "GDAL_NODATA":
+                    directory.setStringEntryValue(act.getFieldTag(), "-2"); //FIXME
+                    break;
+                case "GeoAsciiParams":
+                    ArrayList<String> valuesArr = (ArrayList<String>) values;
+                    directory.setStringEntryValue(act.getFieldTag(), valuesArr.get(0));
+                    break;
+                case "TileOffsets":
+                    //directory.setTileOffsets((ArrayList<Int>) values);
+                    break;
+                case "TileByteCounts":
+                    //directory.setTileByteCounts((ArrayList<Integer>) values);
+                    break;
+                case "ModelPixelScale":
+                    directory.setModelPixelScale((List<Double>) values);
+                    break;
+            }
+            System.out.println(fieldTypeName);
+            System.out.println(fieldTagName);
+            System.out.println(values);
+            System.out.println("-----");
+        }*/
+
+
         directory.setImageWidth(W);
         directory.setImageHeight(H);
         directory.setBitsPerSample(bitsPerSample);
@@ -104,7 +145,7 @@ public class NDSICalculator {
 
         File outFolder = new File(Constants.DATA_PATH + "\\NDSI\\"); outFolder.mkdirs();
         TiffWriter.writeTiff(new File(outFolder.getAbsolutePath() + "\\" + name + ".TIF"), tiffImage);
-        tiffImage = null; directory = null; img = null; //may seem trivial but actually reduces heap memory somehow
+        tiffImage = null; directory = null; img = null; //may seem redundant but actually reduces heap memory somehow
         System.exit(0);
     }
 
