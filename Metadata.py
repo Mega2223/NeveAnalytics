@@ -5,6 +5,7 @@ from os.path import isfile, join
 SRC_ROOT = "C:\\Users\\Imperiums\\Desktop\\Neve"
 
 def transfer_metadata(path_from: str, path_to: str):
+    print("Populating " + path_to)
     tiff_src = gdal.Open(path_from, gdalconst.GA_ReadOnly)
     tiff_dest = gdal.Open(path_to,gdalconst.GA_Update)
 
@@ -21,7 +22,7 @@ def find_src_img(title: str):
     dirs = listdir(corresp)
     for act in dirs:
         actS = act.split(".")
-        if(actS[len(actS)-1] == 'TIF'): return act
+        if(actS[len(actS)-1] == 'TIF'): return corresp + "\\" + act
     return None
     
 snow_files = listdir(SRC_ROOT+"\\NDSI")
@@ -29,5 +30,5 @@ for img in snow_files:
     title = img.split(".")
     if(title[len(title)-1] != 'TIF'): continue
     src_img = find_src_img(title[0])
-    transfer_metadata(src_img,img)
+    transfer_metadata(src_img,SRC_ROOT+"\\NDSI\\"+img)
     

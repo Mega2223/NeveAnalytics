@@ -3,6 +3,7 @@ package net.mega2223.neveanalytics;
 import net.mega2223.neveanalytics.standalonescripts.FileRenamer;
 import net.mega2223.neveanalytics.standalonescripts.FileSorter;
 import net.mega2223.neveanalytics.standalonescripts.NDSICalculator;
+import net.mega2223.neveanalytics.standalonescripts.StatsReportGenerator;
 
 import java.io.IOException;
 
@@ -27,6 +28,13 @@ public class NeveAnalytics {
                     break;
                 case "--save-png":
                     NDSICalculator.savePNG = true;
+                    break;
+                case "--snow-threshold":
+                    currentArg++;
+                    StatsReportGenerator.SNOW_THRESHOLD = Float.parseFloat(args[currentArg]);
+                    break;
+                case "--gen-report":
+                    StatsReportGenerator.main(args);
                     break;
             }
         }

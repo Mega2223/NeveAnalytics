@@ -119,7 +119,6 @@ public class NDSICalculator {
             System.out.println("-----");
         }*/
 
-
         directory.setImageWidth(W);
         directory.setImageHeight(H);
         directory.setBitsPerSample(bitsPerSample);

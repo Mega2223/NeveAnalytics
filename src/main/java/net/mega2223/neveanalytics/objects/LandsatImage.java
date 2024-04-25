@@ -31,7 +31,7 @@ public class LandsatImage {
         year = Integer.parseInt(info[3].substring(0,4));
         month = Integer.parseInt(info[3].substring(4,6));
         day = Integer.parseInt(info[3].substring(6,8));
-        band = Integer.parseInt(info[7].substring(1,2));
+        band = info.length > 7 ?  Integer.parseInt(info[7].substring(1,2)) : 0;
     }
 
     public void bufferImage() throws IOException {
