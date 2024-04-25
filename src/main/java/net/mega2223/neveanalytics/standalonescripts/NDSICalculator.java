@@ -85,24 +85,21 @@ public class NDSICalculator {
         int rowsPerStrip = img.calculateRowsPerStrip(TiffConstants.PLANAR_CONFIGURATION_CHUNKY);
 
         FileDirectory directory = new FileDirectory();
-        directory.setStringEntryValue(FieldTagType.GeoAsciiParams, "-2"); //FIXME
+        directory.setStringEntryValue(FieldTagType.GDAL_NODATA, "-2"); //FIXME
+        //Set<FileDirectoryEntry> ogEntries = original.imgDirectory.getEntries();
 
-        /*Set<FileDirectoryEntry> ogEntries = original.imgDirectory.getEntries();
-        original.image.getFileDirectories().get(0).addEntry(
-                new FileDirectoryEntry(1,1,1)
-        );
-        for (FileDirectoryEntry act : ogEntries) {
+       /* for (FileDirectoryEntry act : ogEntries) {
             String fieldTagName = act.getFieldTag().name();
             String fieldTypeName = act.getFieldType().name();
             Object values = act.getValues();
             switch (fieldTagName){
-                case "GeoKeyDirectory":
-                    directory.setUnsignedIntegerListEntryValue(act.getFieldTag(), (List<Integer>) values);
-                    break;
+                //case "GeoKeyDirectory":
+                //   directory.setUnsignedIntegerListEntryValue(act.getFieldTag(), (List<Integer>) values);
+                //   break;
                 case "GDAL_NODATA":
                     directory.setStringEntryValue(act.getFieldTag(), "-2"); //FIXME
                     break;
-                case "GeoAsciiParams":
+                /*case "GeoAsciiParams":
                     ArrayList<String> valuesArr = (ArrayList<String>) values;
                     directory.setStringEntryValue(act.getFieldTag(), valuesArr.get(0));
                     break;
@@ -146,7 +143,7 @@ public class NDSICalculator {
         File outFolder = new File(Constants.DATA_PATH + "\\NDSI\\"); outFolder.mkdirs();
         TiffWriter.writeTiff(new File(outFolder.getAbsolutePath() + "\\" + name + ".TIF"), tiffImage);
         tiffImage = null; directory = null; img = null; //may seem redundant but actually reduces heap memory somehow
-        System.exit(0);
+
     }
 
     public static void savePNG(double[][] dat, String name) throws IOException {

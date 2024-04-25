@@ -1,11 +1,33 @@
 from osgeo import gdal, gdalconst
+from os import listdir
+from os.path import isfile, join
 
-tiff_src = gdal.Open("C:\\Users\\Imperiums\\Desktop\\Neve\\Unprocessed\\19840312\\001092\\LT05\\LT05_L1GS_001092_19840312_20200918_02_T2_B2.TIF", gdalconst.GA_ReadOnly)
-tiff_dest = gdal.Open("C:\\Users\\Imperiums\\Desktop\\Neve\\NDSI\\LT05_L1GS_001092_19840312_20200918_02_T2.TIF",gdalconst.GA_Update)
+SRC_ROOT = "C:\\Users\\Imperiums\\Desktop\\Neve"
 
-tiff_dest.SetProjection(tiff_src.GetProjection())
-tiff_dest.SetMetadata(tiff_src.GetMetadata())
-tiff_dest.SetGeoTransform(tiff_src.GetGeoTransform())
+def transfer_metadata(path_from: str, path_to: str):
+    tiff_src = gdal.Open(path_from, gdalconst.GA_ReadOnly)
+    tiff_dest = gdal.Open(path_to,gdalconst.GA_Update)
 
-del(tiff_src)
-del(tiff_dest)
+    tiff_dest.SetProjection(tiff_src.GetProjection())
+    # tiff_dest.SetMetadata(tiff_src.GetMetadata())
+    tiff_dest.SetGeoTransform(tiff_src.GetGeoTransform())
+
+    del(tiff_src)
+    del(tiff_dest)
+
+def find_src_img(title: str):
+    title = title.split("_")
+    corresp = SRC_ROOT + "\\Unprocessed\\" + title[3] + "\\" + title[2] + "\\" + title[0]
+    dirs = listdir(corresp)
+    for act in dirs:
+        actS = act.split(".")
+        if(actS[len(actS)-1] == 'TIF'): return act
+    return None
+    
+snow_files = listdir(SRC_ROOT+"\\NDSI")
+for img in snow_files:
+    title = img.split(".")
+    if(title[len(title)-1] != 'TIF'): continue
+    src_img = find_src_img(title[0])
+    transfer_metadata(src_img,img)
+    
