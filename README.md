@@ -34,7 +34,7 @@ Script que usa do GDAL para criar metadados para as imagens em JSON
 Source do código Java da aplicação, a classe NeveAnalytics serve de 'Hub' para os outros scripts em Java
 
 ### FileRenamer.java
-Tira os "(1),(2),..." do final dos arquivos, uma vez que o EarthExplorer coloca eles toda vez quee ele falha um download
+Tira os "(1),(2),..." do final dos arquivos, uma vez que o EarthExplorer coloca eles toda vez que ele falha um download
 
 ### FileSorter.java
 Divide os arquivos em uma hierarquia de pastas
