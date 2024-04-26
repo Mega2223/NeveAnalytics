@@ -1,8 +1,9 @@
 from osgeo import gdal, gdalconst
 from os import listdir
 from os.path import isfile, join
+import json
 
-SRC_ROOT = "C:\\Users\\Imperiums\\Desktop\\Neve"
+SRC_ROOT = json.loads(open("Configs.json").read())["sources_dir"]
 
 def transfer_metadata(path_from: str, path_to: str):
     print("Populating " + path_to)

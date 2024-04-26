@@ -11,8 +11,9 @@ public class Constants {
 
     public static String APP_PATH = System.getProperty("user.dir");
     public static String DATA_PATH;
-
     public static JsonObject PROPERTIES;
+
+    public static Runtime runtime = Runtime.getRuntime();
 
     static {
         try {
