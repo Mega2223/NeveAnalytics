@@ -10,6 +10,9 @@ Para rodar o programa são necessários:
 - Numpy & Matlab (bibliotecas de Python)
 - GDAL (versão mais recente)
 
+## Instruções de uso
+Coloque todas suas imagens com títulos _inalterados_ dentro de uma determinada pasta, em `Config.json` coloque a pasta de seus dados como valor de `sources_dir` e coloque o caminho do seu executável de python em `python_dir`. A partir daí é so rodar a pipeline (é de suma importância que ela seja executada na ordem, uma vez que os dados gerados poela fase anterior são necessários para a seguinte) 
+
 ## Processamento
 
 O projeto é dividido em vário subcomponentes em 3 línguas diferentes (4 classes executáveis Java, 1 script Batch e 2 scripts Python). Todavia todos podem ser executados através da classe NeveAnalytics.java por meio de argumentos de execução. Assim, todos estes scripts standalones estão unificados em um só programa. Para scripts em Java a classe chama o método main de cada script conforme necessário, para scripts em outras linguagens é utilizada a biblioteca de runtime nativa do Java para executar-los, simulando o comportamento da execução por linha de comando.  
@@ -48,3 +51,7 @@ Extrai os metadados dos arquivos de LANDSAT brutos para as imagens geradas pela 
 ### Plot.py
 Plotta os dados conforme a última run do StatsReportGenerator
 
+## Parâmetros adicionais
+- `--save-png`: Além de salvar os arquivos TIFF, também são salvas imagens PNG representando o NDSI.
+- `--snow-threshold`: Troca o threashold que o programa considera como área de neve, por padrão se o NDSI é maior que 0.5 a região é considerada coberta por neve.
+- `--data-path`: Troca a fonte de dados durante a execução
