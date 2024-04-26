@@ -17,6 +17,7 @@ public class StatsReportGenerator {
     public static float SNOW_THRESHOLD = .5F;
 
     public static void main(String[] args) throws IOException {
+        System.out.println("Generating report");
         int snowPixels;
         File folder = new File(Constants.DATA_PATH+"\\NDSI");
         File[] files = folder.listFiles();

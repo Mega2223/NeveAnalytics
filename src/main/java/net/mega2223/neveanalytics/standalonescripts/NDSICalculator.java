@@ -9,13 +9,11 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 public class NDSICalculator {
     public static boolean savePNG = false;
     public static void main(String[] args) throws IOException {
+        System.out.println("Performing raster calculations");
         File root = new File(Constants.DATA_PATH+"\\Unprocessed");
         File[] dates = root.listFiles();
         for (int i = 0; i < dates.length; i++) {
@@ -71,15 +69,16 @@ public class NDSICalculator {
         }
         String outName = bandUpper.name.substring(0, bandUpper.name.length() - 7);
         if(savePNG){savePNG(dat, outName);}
-        saveTIFF(dat,outName,bandLower);
+        saveTIFF(dat,outName);
         bandLower.discardBuffer(); bandUpper.discardBuffer();
     }
 
-    public static void saveTIFF(double[][] dat, String name, LandsatImage original) throws IOException {
+    public static void saveTIFF(double[][] dat, String name) throws IOException {
         final int W = dat.length, H = dat[0].length;
         FieldType fieldType = FieldType.FLOAT;
         int bitsPerSample = fieldType.getBits();
 
+        System.out.println("PROCESSING " + name + ".TIF");
         Rasters img = new Rasters(W, H, 1, fieldType);
 
         int rowsPerStrip = img.calculateRowsPerStrip(TiffConstants.PLANAR_CONFIGURATION_CHUNKY);
@@ -146,11 +145,11 @@ public class NDSICalculator {
     }
 
     public static void savePNG(double[][] dat, String name) throws IOException {
-        System.out.println("PROCESSING " + name);
-        BufferedImage teste = new BufferedImage(dat.length,dat[0].length,BufferedImage.TYPE_3BYTE_BGR);
+        System.out.println("PROCESSING " + name + ".png");
+        BufferedImage teste = new BufferedImage(dat.length,dat[0].length,BufferedImage.TYPE_4BYTE_ABGR);
         for (int i = 0; i < dat.length; i++) {
             for (int j = 0; j < dat[i].length; j++) {
-                if(dat[i][j] == Constants.NO_DATA_DOUBLE){continue;}
+                if(dat[i][j] == Constants.NO_DATA_DOUBLE){teste.setRGB(i,j,0); continue;}
                 int act = (int) ((dat[i][j]+1) * .5D * 255);
                 act = Math.max(Math.min(act,255),0);
                 //if(act!=0){System.out.println(dat[i][j] + "->" + act);}

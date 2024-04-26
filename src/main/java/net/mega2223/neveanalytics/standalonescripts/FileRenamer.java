@@ -15,18 +15,23 @@ public class FileRenamer {
     //essa classe só tira o adendo na frente, uma vez que eu já filtrei e esvaziei os arquivos corrompidos
 
     public static void main(String[] args) {
+        System.out.println("Hygienizing names");
         File root = new File(Constants.DATA_PATH);
         File[] files = root.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            File act = files[i];
+        for (File act : files) {
             String[] name = act.getName().split("\\.");
-            String format = name[name.length-1];
-            if (validFormats.contains(format)){
+            String format = name[name.length - 1];
+            if (validFormats.contains(format)) {
                 String n = act.getName();
+                boolean hasAlteration = false;
                 for (int j = 0; j < 10; j++) {
-                    n = n.replace(" ("+j+")","");
+                    String target = " (" + j + ")";
+                    hasAlteration = hasAlteration || n.contains(target);
+                    n = n.replace(target, "");
                 }
-                act.renameTo(new File(Constants.DATA_PATH+"\\"+n));
+                if(hasAlteration){
+                    act.renameTo(new File(Constants.DATA_PATH + "\\" + n));
+                }
             }
         }
     }
