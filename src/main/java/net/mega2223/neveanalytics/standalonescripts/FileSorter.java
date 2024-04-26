@@ -19,6 +19,7 @@ public class FileSorter {
         for (int i = 0; i < files.length; i++) {
             File act = files[i];
             String[] name = act.getName().split("\\.");
+            if(name.length < 7){continue;}
             String format = name[name.length-1];
             if (validFormats.contains(format)){
                 name = name[0].split("_");
