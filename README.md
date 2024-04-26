@@ -18,7 +18,7 @@ Coloque todas suas imagens com títulos _inalterados_ dentro de uma determinada 
 O projeto é dividido em vário subcomponentes em 3 línguas diferentes (4 classes executáveis Java, 1 script Batch e 2 scripts Python). Todavia todos podem ser executados através da classe NeveAnalytics.java por meio de argumentos de execução. Assim, todos estes scripts standalones estão unificados em um só programa. Para scripts em Java a classe chama o método main de cada script conforme necessário, para scripts em outras linguagens é utilizada a biblioteca de runtime nativa do Java para executar-los, simulando o comportamento da execução por linha de comando.  
 O arquivo .jar de release têm como classe principal o NeveAnalytics.java, assim todas as funções do programa estão disponíveis sem qualquer necessidade de recompilar o programa.  
 
-![NDVI](https://github.com/Mega2223/NeveAnalytics/assets/59067466/44497861-a6c9-454b-8ebb-1fe7bd7c4ba1)
+![NDVI](https://github.com/Mega2223/NeveAnalytics/assets/59067466/78b80dbb-c3d7-4587-9687-741f04269d30)
 
 Assim, o comando a seguir pode efetuar toda a pipeline de forma expressa: 
 ```
