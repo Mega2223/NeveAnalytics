@@ -1,8 +1,28 @@
 # NeveAnalytics
 
-Conjunto de programas que eu fiz pro meu projeto final de Sensoriamento Remoto na UFABC, com função de calcular o NDSI de várias imagens de satélite em massa por linha de comando.
+Conjunto de ferramentas que eu desenvolvi como meu projeto final de Sensoriamento Remoto na UFABC, com função de calcular o NDSI (Normalized Difference Snow Index) de várias imagens de satélite em massa por linha de comando.
 
-## Componentes
+## Dependências
+Para rodar o programa são necessários: 
+- Sistema operacional Windows
+- Java versão >= 17
+- Python versãao >= 3.11.6
+- Numpy & Matlab (bibliotecas de Python)
+- GDAL (versão mais recente)
+
+## Processamento
+
+O projeto é dividido em vário subcomponentes em 3 línguas diferentes (4 classes executáveis Java, 1 script Batch e 2 scripts Python). Todavia todos podem ser executados através da classe NeveAnalytics.java por meio de argumentos de execução. Assim, todos estes scripts standalones estão unificados em um só programa. Para scripts em Java a classe chama o método main de cada script conforme necessário, para scripts em outras linguagens é utilizada a biblioteca de runtime nativa do Java para executar-los, simulando o comportamento da execução por linha de comando.  
+O arquivo .jar de release têm como classe principal o NeveAnalytics.java, assim todas as funções do programa estão disponíveis sem qualquer necessidade de recompilar o programa.  
+
+![NDVI](https://github.com/Mega2223/NeveAnalytics/assets/59067466/44497861-a6c9-454b-8ebb-1fe7bd7c4ba1)
+
+Assim, o comando a seguir pode efetuar toda a pipeline de forma expressa: 
+```
+java -jar NeveAnalytics.jar --clean-names --gen-in-metadata -sort --save-png --perform-raster-equations --extract-metadata --gen-out-metadata --gen-report --plot-graph
+```
+
+## Subcomponentes
 
 ### Info.bat 
 Script que usa do GDAL para criar metadados para as imagens em JSON
