@@ -6,7 +6,7 @@ Conjunto de ferramentas que eu desenvolvi como meu projeto final de Sensoriament
 Para rodar o programa são necessários: 
 - Sistema operacional Windows
 - Java versão >= 17
-- Python versãao >= 3.11.6
+- Python versão >= 3.11.6
 - Numpy & Matlab (bibliotecas de Python)
 - GDAL (versão mais recente)
 
