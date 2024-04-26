@@ -55,3 +55,11 @@ Plotta os dados conforme a última run do StatsReportGenerator
 - `--save-png`: Além de salvar os arquivos TIFF, também são salvas imagens PNG representando o NDSI.
 - `--snow-threshold`: Troca o threashold que o programa considera como área de neve, por padrão se o NDSI é maior que 0.5 a região é considerada coberta por neve.
 - `--data-path`: Troca a fonte de dados durante a execução
+
+## Dependências de build
+Para compilar este programa são necessários: 
+- Java versão >= 17
+- Maven
+- [tiff-java](https://github.com/ngageoint/tiff-java) (dependência Maven)
+- [GSON](https://github.com/google/gson) (dependência Maven)
+
