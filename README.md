@@ -11,7 +11,7 @@ Para rodar o programa são necessários:
 - GDAL (versão mais recente)
 
 ## Instruções de uso
-Coloque todas suas imagens com títulos _inalterados_ dentro de uma determinada pasta, em `Config.json` coloque a pasta de seus dados como valor de `sources_dir` e coloque o caminho do seu executável de python em `python_dir`. A partir daí é so rodar a pipeline (é de suma importância que ela seja executada na ordem, uma vez que os dados gerados poela fase anterior são necessários para a seguinte) 
+Coloque todas suas imagens com títulos _inalterados_ dentro de uma determinada pasta, em `Config.json` coloque a pasta de seus dados como valor de `sources_dir` e coloque o caminho do seu executável de python em `python_dir`. A partir daí é so rodar a pipeline (é de suma importância que ela seja executada na ordem, uma vez que os dados gerados pela fase anterior são necessários para a seguinte) 
 
 ## Processamento
 
