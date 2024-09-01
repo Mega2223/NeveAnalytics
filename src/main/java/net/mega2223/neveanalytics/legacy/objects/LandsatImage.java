@@ -1,4 +1,4 @@
-package net.mega2223.neveanalytics.objects;
+package net.mega2223.neveanalytics.legacy.objects;
 
 import mil.nga.tiff.*;
 

@@ -1,10 +1,8 @@
-package net.mega2223.neveanalytics.standalonescripts;
+package net.mega2223.neveanalytics.legacy.standalonescripts;
 
-import net.mega2223.neveanalytics.Constants;
+import net.mega2223.neveanalytics.legacy.Constants;
 
 import java.io.File;
-
-import static net.mega2223.neveanalytics.standalonescripts.FileSorter.validFormats;
 
 public class FileRenamer {
     //quando o bulk downloader do EarthExplorer falha, ele tenta de novo.
@@ -21,7 +19,7 @@ public class FileRenamer {
         for (File act : files) {
             String[] name = act.getName().split("\\.");
             String format = name[name.length - 1];
-            if (validFormats.contains(format)) {
+            if (FileSorter.validFormats.contains(format)) {
                 String n = act.getName();
                 boolean hasAlteration = false;
                 for (int j = 0; j < 10; j++) {

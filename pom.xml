@@ -5,14 +5,20 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.mega2223</groupId>
-    <artifactId>NeveAnalytics</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>neveanalytics</artifactId>
+    <version>1.0-STABLE</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <geotools.version>32-SNAPSHOT</geotools.version>
+        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
+
+    <repositories>
+
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -25,6 +31,30 @@
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>net.mega2223.neveanalytics.legacy.NeveAnalytics</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

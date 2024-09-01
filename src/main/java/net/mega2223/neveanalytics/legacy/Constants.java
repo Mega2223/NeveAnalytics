@@ -1,4 +1,4 @@
-package net.mega2223.neveanalytics;
+package net.mega2223.neveanalytics.legacy;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

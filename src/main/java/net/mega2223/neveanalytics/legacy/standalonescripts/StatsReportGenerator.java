@@ -1,13 +1,12 @@
-package net.mega2223.neveanalytics.standalonescripts;
+package net.mega2223.neveanalytics.legacy.standalonescripts;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import mil.nga.tiff.Rasters;
-import net.mega2223.neveanalytics.Constants;
-import net.mega2223.neveanalytics.Utils;
-import net.mega2223.neveanalytics.objects.LandsatImage;
+import net.mega2223.neveanalytics.legacy.Constants;
+import net.mega2223.neveanalytics.legacy.Utils;
+import net.mega2223.neveanalytics.legacy.objects.LandsatImage;
 
 import java.io.File;
 import java.io.FileReader;

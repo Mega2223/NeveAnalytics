@@ -1,9 +1,9 @@
-package net.mega2223.neveanalytics.standalonescripts;
+package net.mega2223.neveanalytics.legacy.standalonescripts;
 
+import net.mega2223.neveanalytics.legacy.Constants;
+import net.mega2223.neveanalytics.legacy.objects.LandsatImage;
 import mil.nga.tiff.*;
 import mil.nga.tiff.util.TiffConstants;
-import net.mega2223.neveanalytics.Constants;
-import net.mega2223.neveanalytics.objects.LandsatImage;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

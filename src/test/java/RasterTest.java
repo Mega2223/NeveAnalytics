@@ -1,5 +1,5 @@
-import net.mega2223.neveanalytics.Constants;
-import net.mega2223.neveanalytics.objects.LandsatImage;
+import net.mega2223.neveanalytics.legacy.Constants;
+import net.mega2223.neveanalytics.legacy.objects.LandsatImage;
 
 import java.io.File;
 import java.io.IOException;

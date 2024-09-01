@@ -1,9 +1,9 @@
-package net.mega2223.neveanalytics;
+package net.mega2223.neveanalytics.legacy;
 
-import net.mega2223.neveanalytics.standalonescripts.FileRenamer;
-import net.mega2223.neveanalytics.standalonescripts.FileSorter;
-import net.mega2223.neveanalytics.standalonescripts.NDSICalculator;
-import net.mega2223.neveanalytics.standalonescripts.StatsReportGenerator;
+import net.mega2223.neveanalytics.legacy.standalonescripts.FileSorter;
+import net.mega2223.neveanalytics.legacy.standalonescripts.StatsReportGenerator;
+import net.mega2223.neveanalytics.legacy.standalonescripts.FileRenamer;
+import net.mega2223.neveanalytics.legacy.standalonescripts.NDSICalculator;
 
 import java.io.*;
 
@@ -73,7 +73,7 @@ public class NeveAnalytics {
                     System.out.println("Plotting graph...");
                     Process plot = Constants.runtime.exec(new String[]{Constants.PROPERTIES.get("python_dir").getAsString(), Constants.APP_PATH + "\\Plot.py"});
                     while (plot.isAlive()){
-                        try {Thread.sleep(100);}catch (InterruptedException ignored){}
+                        try {Thread.sleep(10);}catch (InterruptedException ignored){}
                     }
                     break;
 

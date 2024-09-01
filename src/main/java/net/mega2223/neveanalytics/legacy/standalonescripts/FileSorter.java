@@ -1,6 +1,6 @@
-package net.mega2223.neveanalytics.standalonescripts;
+package net.mega2223.neveanalytics.legacy.standalonescripts;
 
-import net.mega2223.neveanalytics.Constants;
+import net.mega2223.neveanalytics.legacy.Constants;
 
 import java.io.File;
 import java.io.IOException;
