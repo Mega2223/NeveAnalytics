@@ -1,24 +1,29 @@
 package net.mega2223.neveanalytics.objects;
 
+import net.mega2223.neveanalytics.Utils;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class LandsatPicture<DataType extends Number> {
-    ArrayList<LandsatBand<DataType>> bands = new ArrayList<>();
 
+    ArrayList<LandsatBand<DataType>> bands = new ArrayList<>();
+    public static String name = null;
     LandsatPicture(List<LandsatBand<DataType>> images){
         bands.addAll(images);
+        name = images.get(0).getNameNoBand();
     }
     LandsatPicture(LandsatBand<DataType> image){
-        bands.add(image);
+        this(List.of(image));
     }
 
     public LandsatBand<DataType> getBand(int band){
         for (LandsatBand<DataType> act : bands){
             if(act.band == band){return act;}
         }
+        Utils.log("Warning, could not find band " + band + " for image " + name, Utils.DEBUG_IMPORTANT);
         return null;
     }
 
@@ -27,6 +32,7 @@ public class LandsatPicture<DataType extends Number> {
     }
 
     public static List<LandsatPicture<? extends Number>> scanFolder(String folder) throws IOException {
+        Utils.log("Loading folder " + folder,Utils.DEBUG_DETAIL);
         ArrayList<LandsatBand<? extends Number>> imgs = new ArrayList<>();
         ArrayList<LandsatPicture<? extends Number>> pics = new ArrayList<>();
 
@@ -56,5 +62,9 @@ public class LandsatPicture<DataType extends Number> {
     }
     public int getY(){
         return bands.get(0).sizeY;
+    }
+
+    public List<LandsatBand<DataType>> getBands() {
+        return List.copyOf(bands);
     }
 }

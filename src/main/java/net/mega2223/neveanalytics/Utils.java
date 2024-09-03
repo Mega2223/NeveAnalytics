@@ -1,13 +1,25 @@
 package net.mega2223.neveanalytics;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import mil.nga.tiff.*;
 import mil.nga.tiff.util.TiffConstants;
 import net.mega2223.neveanalytics.legacy.Constants;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 
 public class Utils {
+
+    public static final int DEBUG_NOTHING = 0, DEBUG_IMPORTANT = 1, DEBUG_TASKS = 2, DEBUG_DETAIL = 3, DEBUG_VERBOSE = 4;
+    public static int DEBUG_LEVEL = 0;
+
+    public static void log(String log, int level){
+        if(level <= DEBUG_LEVEL){System.out.println(log);}
+    }
+
     public static void saveTIFF(Number[][] dat, String path, String name) throws IOException {
         final int W = dat.length, H = dat[0].length;
         FieldType fieldType = FieldType.FLOAT;
@@ -49,5 +61,9 @@ public class Utils {
         if(n instanceof Integer || n instanceof Short || n instanceof Long){return TiffConstants.SAMPLE_FORMAT_SIGNED_INT;}
         else if(n instanceof Float || n instanceof Double){return TiffConstants.SAMPLE_FORMAT_FLOAT;}
         else{return TiffConstants.SAMPLE_FORMAT_UNDEFINED;}
+    }
+
+    public static JsonElement readJson(String path) throws FileNotFoundException {
+        return JsonParser.parseReader(new FileReader(path));
     }
 }
