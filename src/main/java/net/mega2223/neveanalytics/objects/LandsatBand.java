@@ -36,6 +36,12 @@ public class LandsatBand<DataType extends Number> {
         return LoadImage(location+"\\"+name+".TIF");
     }
 
+    public static LandsatBand<? extends Number> genImage(String location, String name, int x, int y, Number datatype) throws IOException {
+        Utils.log("Generating image " + name,Utils.DEBUG_DETAIL);
+        Utils.saveTIFF(x,y,location,name,datatype);
+        return LoadImage(location+"\\"+name+".TIF");
+    }
+
     private LandsatBand(String path) {
         this.path = path;
         this.file = new File(path);
@@ -52,7 +58,7 @@ public class LandsatBand<DataType extends Number> {
         int band;
         try{
             band = info.length > 7 ?  Integer.parseInt(info[7].substring(1,2)) : 0;
-        } catch (NumberFormatException ignored){band = -1;}
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException ignored){band = -1;}
         this.band = band;
     }
 
@@ -72,8 +78,8 @@ public class LandsatBand<DataType extends Number> {
     }
 
     @Override
-    public LandsatBand clone() {
-        return new LandsatBand(path,name,assossiatedMtlPath,file,mtl,landsatID,locPath,locRow,band,year,month,day);
+    public LandsatBand<DataType> clone() {
+        return new LandsatBand<>(path, name, assossiatedMtlPath, file, mtl, landsatID, locPath, locRow, band, year, month, day);
     }
 
     public void bufferImage() throws IOException {
@@ -92,15 +98,16 @@ public class LandsatBand<DataType extends Number> {
 
     public void discardBuffer(){
         Utils.log("Unloading image " + name + " from memory", Utils.DEBUG_DETAIL);
+        imgDirectory.setCache(false);
         image = null; directories = null; imgDirectory = null; raster = null; entries = null;
         cache.remove(this);
-        try{Thread.sleep(150);} catch (InterruptedException ignored){}
+        try{Thread.sleep(200);} catch (InterruptedException ignored){}
         printCache();
     }
 
     public DataType get(int x, int y){
         if(raster != null){
-            return (DataType) raster.getPixel(x,y)[0];
+            return (DataType) raster.getPixelSample(0,x,y); //TODO isso vai?
         }
         throw new BandNotLoadedException();
     }
@@ -112,6 +119,11 @@ public class LandsatBand<DataType extends Number> {
 
     public String getNameNoBand(){
         return name.substring(0,name.length() - 7);
+    }
+
+    public void save(){
+        Utils.saveTIFF();
+        discardBuffer();
     }
 
     @Override

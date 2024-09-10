@@ -16,46 +16,36 @@ public abstract class Operation {
     static int imgCounter = 0;
     static final ArrayList<Operation> OPERATIONS = new ArrayList<>();
 
-    public static LandsatBand<? extends Number> runOperation(JsonElement equation, LandsatPicture<?> picture) throws IOException {
+    static LandsatBand<?> evaluate(JsonElement band, LandsatPicture<?> picture){
+        //Returns band that coincides with element if the element is a band, otherwise returns the operation result
+        return band.isJsonPrimitive() ? picture.getBand(band.getAsJsonPrimitive().getAsInt()) :
+                runOperation(picture,band.getAsJsonObject());
+    }
+
+    public static LandsatBand<? extends Number> runOperation(LandsatPicture<?> reference, JsonObject equation){
         JsonObject eq = equation.getAsJsonObject();
         JsonElement opr = eq.get("operation");
+        String operationJ = opr.getAsString();
 
-        LandsatBand<? extends Number> band1 = decodeBand(eq.get("b1"),picture);
-        LandsatBand<? extends Number> band2 = decodeBand(eq.get("b2"),picture);
+        LandsatBand<?> bandA = evaluate(eq.get("b1"),reference),
+                bandB = evaluate(eq.get("b2"),reference);
 
-        String operation = opr.getAsString();
+        Operation operation = getFromName(operationJ);
 
+        for (int x = 0; x < reference.getX(); x++) {
+            for (int y = 0; y < reference.getY(); y++) {
+
+            }
+        }
+
+        throw new RuntimeException("Could not resolve operation \"" + operationJ + "\"");
+    }
+
+    public static Operation getFromName(String name){
         for(Operation act : OPERATIONS){
-            if(operation.equals(act.getName())){
-                return runOperation(act,band1,band2);
-            }
+            if(name.equals(act.getName())){return act;}
         }
-        throw new RuntimeException("Could not resolve operation \"" + operation + "\"");
-    }
-
-    public static LandsatBand<? extends Number> runOperation(Operation operation, LandsatBand<?> b1, LandsatBand<?> b2) throws IOException {
-        Utils.log("Running operation \"" + operation.getName() + "\" for " + b1.name + " and " + b2.name,Utils.DEBUG_DETAIL);
-        b1.bufferImage(); b2.bufferImage();
-        Number[][] data = new Number[b1.sizeX][b2.sizeY];
-        for (int x = 0; x < b1.sizeX; x++) {
-            for (int y = 0; y < b1.sizeY; y++) {
-                data[x][y] = operation.doOperation(b1.get(x,y),b2.get(x,y));
-            }
-        }
-        imgCounter++;
-        b1.discardBuffer(); b2.discardBuffer();
-        try{Thread.sleep(50);} catch (InterruptedException ignored){}
-        return LandsatBand.genImage(
-                NeveAnalyitcs.CONFIG.get("temp_dir").getAsString(),
-                b1.getNameNoBand() + "_" + operation.getName() + "_TEMP_" + imgCounter,
-                data
-        );
-    }
-
-    static LandsatBand<?> decodeBand(JsonElement band, LandsatPicture<?> picture) throws IOException {
-        if(band.isJsonObject()){
-            return runOperation(band,picture);} else
-            {return picture.getBand(band.getAsInt());}
+        return null;
     }
 
     @Override
@@ -68,15 +58,16 @@ public abstract class Operation {
             static final String name = "sum";
             @Override
             Number doOperation(Number a, Number b) {
-                if(a instanceof Float || a instanceof Double){
-                    double dA = (double) a, dB = (double) b;
-                    return dA + dB;
-                } else if (a instanceof Long || a instanceof Integer || a instanceof Short) {
-                    long dA = a.longValue(),dB = b.longValue();
-                    return dA + dB;
-                } else {
-                    return Integer.MIN_VALUE;
-                }
+//                if(a instanceof Float || a instanceof Double){
+//                    double dA = (double) a, dB = (double) b;
+//                    return dA + dB;
+//                } else if (a instanceof Long || a instanceof Integer || a instanceof Short) {
+//                    long dA = a.longValue(),dB = b.longValue();
+//                    return dA + dB;
+//                } else {
+//                    return Integer.MIN_VALUE;
+//                } TODO olha isso dps
+                return a.doubleValue() + b.doubleValue();
             }
 
             @Override
@@ -85,18 +76,19 @@ public abstract class Operation {
             }
         });
         OPERATIONS.add(new Operation() {
-            static final String name = "minus";
+            static final String name = "subtraction";
             @Override
             Number doOperation(Number a, Number b) {
-                if(a instanceof Float || a instanceof Double){
-                    double dA = (double) a, dB = (double) b;
-                    return dA - dB;
-                } else if (a instanceof Long || a instanceof Integer || a instanceof Short) {
-                    long dA = (long) a, dB = (long) b;
-                    return dA - dB;
-                } else {
-                    return Integer.MIN_VALUE;
-                }
+//                if(a instanceof Float || a instanceof Double){
+//                    double dA = (double) a, dB = (double) b;
+//                    return dA - dB;
+//                } else if (a instanceof Long || a instanceof Integer || a instanceof Short) {
+//                    long dA = (long) a, dB = (long) b;
+//                    return dA - dB;
+//                } else {
+//                    return Integer.MIN_VALUE;
+//                } TODO
+                return a.doubleValue() - b.doubleValue();
             }
 
             @Override
@@ -105,18 +97,19 @@ public abstract class Operation {
             }
         });
         OPERATIONS.add(new Operation() {
-            static final String name = "multiply";
+            static final String name = "multiplication";
             @Override
             Number doOperation(Number a, Number b) {
-                if(a instanceof Float || a instanceof Double || b instanceof Float || b instanceof Double){
-                    double dA = a.doubleValue(), dB = b.doubleValue();
-                    return dA * dB;
-                } else if (a instanceof Long || a instanceof Integer || a instanceof Short) {
-                    long dA = a.longValue(), dB = b.longValue();
-                    return dA * dB;
-                } else {
-                    return Integer.MIN_VALUE;
-                }
+//                if(a instanceof Float || a instanceof Double || b instanceof Float || b instanceof Double){
+//                    double dA = a.doubleValue(), dB = b.doubleValue();
+//                    return dA * dB;
+//                } else if (a instanceof Long || a instanceof Integer || a instanceof Short) {
+//                    long dA = a.longValue(), dB = b.longValue();
+//                    return dA * dB;
+//                } else {
+//                    return Integer.MIN_VALUE;
+//                } TODO
+                return a.doubleValue() * b.doubleValue();
             }
 
             @Override
@@ -134,17 +127,6 @@ public abstract class Operation {
             @Override
             String getName() {
                 return name;
-            }
-        });
-        OPERATIONS.add(new Operation() {
-            @Override
-            Number doOperation(Number a, Number b) {
-                return null; //never runs
-            }
-
-            @Override
-            String getName() {
-                return "operation";
             }
         });
     }
