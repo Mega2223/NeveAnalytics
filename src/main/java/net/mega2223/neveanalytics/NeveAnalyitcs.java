@@ -9,6 +9,7 @@ public class NeveAnalyitcs {
     public static int currentArg = 0;
     
     public static void main(String[] args)  {
+        Utils.clearTemp();
         while(currentArg < args.length){
 
             currentArg++;

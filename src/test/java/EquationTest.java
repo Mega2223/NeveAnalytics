@@ -12,8 +12,8 @@ public class EquationTest {
         Utils.DEBUG_LEVEL = Utils.DEBUG_VERBOSE;
         List<LandsatPicture<? extends Number>> pic = LandsatPicture.scanFolder(Constants.DATA_PATH);
         for (LandsatPicture<?> act : pic){
-            List<? extends LandsatBand<?>> bands = act.getBands();
-            Operation.runOperation(Utils.readJson(Constants.APP_PATH + "\\operations\\NDSI.json"), act);
+            //List<? extends LandsatBand<?>> bands = act.getBands();
+            Operation.runOperation(act,Utils.readJson(Constants.APP_PATH + "\\operations\\NDSI.json").getAsJsonObject());
         }
     }
 }

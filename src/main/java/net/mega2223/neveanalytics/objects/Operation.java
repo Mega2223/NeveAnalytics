@@ -16,13 +16,13 @@ public abstract class Operation {
     static int imgCounter = 0;
     static final ArrayList<Operation> OPERATIONS = new ArrayList<>();
 
-    static LandsatBand<?> evaluate(JsonElement band, LandsatPicture<?> picture){
+    static LandsatBand<?> evaluate(JsonElement band, LandsatPicture<?> picture) throws IOException {
         //Returns band that coincides with element if the element is a band, otherwise returns the operation result
         return band.isJsonPrimitive() ? picture.getBand(band.getAsJsonPrimitive().getAsInt()) :
                 runOperation(picture,band.getAsJsonObject());
     }
 
-    public static LandsatBand<? extends Number> runOperation(LandsatPicture<?> reference, JsonObject equation){
+    public static LandsatBand<? extends Number> runOperation(LandsatPicture<?> reference, JsonObject equation) throws IOException {
         JsonObject eq = equation.getAsJsonObject();
         JsonElement opr = eq.get("operation");
         String operationJ = opr.getAsString();
@@ -30,16 +30,33 @@ public abstract class Operation {
         LandsatBand<?> bandA = evaluate(eq.get("b1"),reference),
                 bandB = evaluate(eq.get("b2"),reference);
 
+        bandA.bufferImage(); bandB.bufferImage();
         Operation operation = getFromName(operationJ);
 
-        for (int x = 0; x < reference.getX(); x++) {
-            for (int y = 0; y < reference.getY(); y++) {
-
+        final int xMax = reference.getX(), yMax = reference.getY();;
+        LandsatBand<?> result = LandsatBand.genImage(
+                NeveAnalyitcs.CONFIG.get("temp_dir").getAsString(),
+                bandA.getNameNoBand() + "_" + operation.getName() + "_" + imgCounter,
+                xMax,yMax, (float) 0);
+        result.bufferImage();
+        for (int x = 0; x < xMax; x++) {
+            for (int y = 0; y < yMax; y++) {
+                Number res = operation.doOperation(bandA.get(x, y), bandB.get(x, y));
+                res = Float.isNaN(res.floatValue()) || Float.isInfinite(res.floatValue()) ? 0 : res;
+                result.raster.setFirstPixelSample(x,y,
+                        res
+                );
+                if(res.doubleValue() != 0){
+                    dos();
+                }
             }
         }
-
-        throw new RuntimeException("Could not resolve operation \"" + operationJ + "\"");
+        bandA.discardBuffer(); bandB.discardBuffer();
+        imgCounter++;
+        result.save();
+        return result;
     }
+    static void dos(){}
 
     public static Operation getFromName(String name){
         for(Operation act : OPERATIONS){

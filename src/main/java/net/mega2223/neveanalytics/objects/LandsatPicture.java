@@ -39,6 +39,11 @@ public class LandsatPicture<DataType extends Number> {
         File[] repo = new File(folder).listFiles();
 
         for(File act : repo){
+            String[] name = act.getName().split("\\.");
+            if(act.isDirectory() || name.length < 2 ||
+                    !(name[name.length-1].equals("TIF") || name[name.length-1].equals("TIFF"))){
+                continue;
+            }
             LandsatBand<? extends Number> bandAct = LandsatBand.LoadImage(act.getAbsolutePath());
             boolean alreadyHasPicture = false;
             for(LandsatPicture p : pics){
@@ -58,10 +63,26 @@ public class LandsatPicture<DataType extends Number> {
     }
 
     public int getX(){
-        return bands.get(0).sizeX;
+        int sizeX = bands.get(0).sizeX;
+        if(sizeX < 0){
+            try {
+                bands.get(0).bufferImage();
+                sizeX = bands.get(0).sizeX;
+                bands.get(0).discardBuffer();
+            } catch (IOException ignored) {}
+        }
+        return sizeX;
     }
     public int getY(){
-        return bands.get(0).sizeY;
+        int sizeY = bands.get(0).sizeY;
+        if(sizeY < 0){
+            try {
+                bands.get(0).bufferImage();
+                sizeY = bands.get(0).sizeY;
+                bands.get(0).discardBuffer();
+            } catch (IOException ignored) {}
+        }
+        return sizeY;
     }
 
     public List<LandsatBand<DataType>> getBands() {
