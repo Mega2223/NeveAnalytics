@@ -16,28 +16,32 @@ public abstract class Operation {
     static int imgCounter = 0;
     static final ArrayList<Operation> OPERATIONS = new ArrayList<>();
 
-    static LandsatBand<?> evaluate(JsonElement band, LandsatPicture<?> picture) throws IOException {
+    static LandsatBand<?> evaluate(JsonElement band, LandsatPicture<?> picture, boolean unbuffer) throws IOException {
         //Returns band that coincides with element if the element is a band, otherwise returns the operation result
         return band.isJsonPrimitive() ? picture.getBand(band.getAsJsonPrimitive().getAsInt()) :
-                runOperation(picture,band.getAsJsonObject());
+                runOperation(picture,band.getAsJsonObject(),null,unbuffer);
     }
-
-    public static LandsatBand<? extends Number> runOperation(LandsatPicture<?> reference, JsonObject equation) throws IOException {
+    public static LandsatBand<? extends Number> runOperation(LandsatPicture<?> reference, JsonObject equation, String name, boolean unbuffer) throws IOException {
+        return runOperation(reference,equation,name,NeveAnalyitcs.CONFIG.get("temp_dir").getAsString(), unbuffer);
+    }
+    public static LandsatBand<? extends Number> runOperation(LandsatPicture<?> reference, JsonObject equation, String name, String dir, boolean unbuffer) throws IOException {
         JsonObject eq = equation.getAsJsonObject();
         JsonElement opr = eq.get("operation");
         String operationJ = opr.getAsString();
 
-        LandsatBand<?> bandA = evaluate(eq.get("b1"),reference),
-                bandB = evaluate(eq.get("b2"),reference);
+        LandsatBand<?> bandA = evaluate(eq.get("b1"),reference,unbuffer),
+                bandB = evaluate(eq.get("b2"),reference,unbuffer);
 
         bandA.bufferImage(); bandB.bufferImage();
         Operation operation = getFromName(operationJ);
 
-        final int xMax = reference.getX(), yMax = reference.getY();;
+        if(name == null){name = bandA.getNameNoBand() + "_" + operation.getName() + "_" + imgCounter;}
+        final int xMax = reference.getX(), yMax = reference.getY();
         LandsatBand<?> result = LandsatBand.genImage(
-                NeveAnalyitcs.CONFIG.get("temp_dir").getAsString(),
-                bandA.getNameNoBand() + "_" + operation.getName() + "_" + imgCounter,
+                dir,
+                name,
                 xMax,yMax, (float) 0);
+        Utils.copyGEOTIFFProperties(bandA.file,result.file);
         result.bufferImage();
         for (int x = 0; x < xMax; x++) {
             for (int y = 0; y < yMax; y++) {
@@ -51,7 +55,7 @@ public abstract class Operation {
                 }
             }
         }
-        bandA.discardBuffer(); bandB.discardBuffer();
+        if(unbuffer){bandA.discardBuffer(); bandB.discardBuffer();}
         imgCounter++;
         result.save();
         return result;

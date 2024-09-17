@@ -5,6 +5,8 @@ import jdk.jshell.execution.Util;
 import mil.nga.tiff.*;
 import net.mega2223.neveanalytics.Utils;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -102,13 +104,18 @@ public class LandsatBand<DataType extends Number> {
     }
 
     public String getNameNoBand(){
-        return band >= 0 ? name.substring(0,name.length() - 7) : name; //TODO
+        return band > 0 ? name.substring(0,name.length() - 7) : name; //TODO
     }
 
     public void save() throws IOException {
-        bufferImage();
+        boolean buffered = isBuffered();
+        if(!buffered){bufferImage();}
         Utils.saveTIFF(raster,this.file.getParent(),name.substring(0,name.length()-4));
-        discardBuffer();
+        if(!buffered){discardBuffer();}
+    }
+
+    public boolean isBuffered(){
+        return raster == null;
     }
 
     @Override
@@ -126,8 +133,15 @@ public class LandsatBand<DataType extends Number> {
     }
 
     public static void clearCache(){
-        while (cache.size() > 0) {
+        while (!cache.isEmpty()) {
             cache.get(0).discardBuffer();
+        }
+    }
+    public static void clearCacheBut(LandsatBand<?> ... bands){
+        List<LandsatBand<?>> bandList = List.of(bands);
+        while (cache.size() > bands.length) {
+            LandsatBand<?> band = cache.get(0);
+            if(!bandList.contains(band)){band.discardBuffer();}
         }
     }
 
@@ -174,8 +188,9 @@ public class LandsatBand<DataType extends Number> {
             return js;
         } else {
             try {
-                //GDAL breaks when I run directly from the runScript so I have to create A BATCH file with the command and then
-                //run the batch file, this is the greatest CSS moment ever
+                // GDAL breaks when I run directly from the runScript,
+                // so I have to create A BATCH FILE with the command and then run said batch file,
+                // this is the most CSS moment ever
                 String cmd = "gdalinfo -stats -nomd -norat -noct -json " + band.file.getAbsolutePath() + ">>" + band.file.getAbsolutePath() + ".json";
                 File f = new File(band.file.getParentFile().getAbsolutePath()+"\\g.bat");
                 f.createNewFile();
@@ -184,7 +199,6 @@ public class LandsatBand<DataType extends Number> {
                 w.close();
                 Utils.runScript(band.file.getParent()+"\\g.bat",band.file.getParentFile());
                 f.delete();
-
             } catch (IOException notIgnored) {
                 throw new RuntimeException(notIgnored);
             }
@@ -192,5 +206,25 @@ public class LandsatBand<DataType extends Number> {
         return Utils.doRecursiveSearch(
                 band.name + ".json", new File(band.file.getParent())
         );
+    }
+
+    public File genPNG(float min, float max, float[] minColor, float[] maxColor, String path) throws IOException {
+        this.bufferImage();
+        BufferedImage res = new BufferedImage(sizeX,sizeY,BufferedImage.TYPE_4BYTE_ABGR);
+        float range = min - max;
+        for (int x = 0; x < sizeX; x++) {
+            for (int y = 0; y < sizeY; y++) {
+                float pixel = raster.getPixel(x, y)[0].floatValue();
+                pixel = Utils.interpolate(min,max, pixel);
+                int r = (int) Utils.interpolate(minColor[0],maxColor[0],pixel),
+                        g = (int) Utils.interpolate(minColor[1],maxColor[1],pixel),
+                        b = (int) Utils.interpolate(minColor[2],maxColor[2],pixel);
+                int col = (r<<16) + (g<<8) + b;
+                res.setRGB(x,y,col);
+            }
+        }
+        File ret = new File(path);
+        ImageIO.write(res,"png", ret);
+        return ret;
     }
 }

@@ -68,7 +68,6 @@ public class LandsatPicture<DataType extends Number> {
             try {
                 bands.get(0).bufferImage();
                 sizeX = bands.get(0).sizeX;
-                bands.get(0).discardBuffer();
             } catch (IOException ignored) {}
         }
         return sizeX;
@@ -79,7 +78,6 @@ public class LandsatPicture<DataType extends Number> {
             try {
                 bands.get(0).bufferImage();
                 sizeY = bands.get(0).sizeY;
-                bands.get(0).discardBuffer();
             } catch (IOException ignored) {}
         }
         return sizeY;

@@ -1,5 +1,6 @@
 {
-  "python_dir": "C:\\Python\\Path\\Here\\Python.exe",
+  "python_dir": "C:\\Users\\Imperiums\\miniconda3\\python.exe",
   "sources_dir": "C:\\Users\\Imperiums\\Desktop\\menos",
-  "temp_dir": "C:\\Users\\Imperiums\\Desktop\\temp"
+  "temp_dir": "C:\\Users\\Imperiums\\Desktop\\temp",
+  "dest_dir": "C:\\Users\\Imperiums\\Desktop\\temp\\dest"
 }

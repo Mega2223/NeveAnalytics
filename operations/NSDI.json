@@ -1,6 +1,10 @@
 {
   "operation": "division",
-  "b1": 3,
+  "b1": {
+    "operation": "subtraction",
+    "b1": 3,
+    "b2": 6
+  },
   "b2": {
     "operation": "sum",
     "b1": 3,

@@ -4,11 +4,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import mil.nga.tiff.*;
 import mil.nga.tiff.util.TiffConstants;
-import net.mega2223.neveanalytics.legacy.Constants;
 import net.mega2223.neveanalytics.objects.LandsatBand;
+import org.gdal.gdal.Dataset;
+import org.gdal.gdal.gdal;
 
 import java.io.*;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public class Utils {
@@ -53,7 +55,6 @@ public class Utils {
         tiffImage.add(directory);
 
         File outFolder = new File(path); outFolder.mkdirs();
-        LandsatBand.clearCache();
 
         try{
             Thread.sleep(100);
@@ -97,7 +98,6 @@ public class Utils {
         tiffImage.add(directory);
 
         File outFolder = new File(path); outFolder.mkdirs();
-        LandsatBand.clearCache();
 
         try{
             Thread.sleep(100);
@@ -142,7 +142,9 @@ public class Utils {
 
         TIFFImage tiffImage = new TIFFImage();
         tiffImage.add(directory);
-        TiffWriter.writeTiff(new File(path+"\\"+name+".TIF"), tiffImage);
+        File f = new File(path + "\\" + name + ".TIF");
+        f.getParentFile().mkdirs();
+        TiffWriter.writeTiff(f, tiffImage);
     }
 
     static int getFormat(Number n){
@@ -159,7 +161,11 @@ public class Utils {
         String dir = NeveAnalyitcs.CONFIG.get("temp_dir").getAsString();
         File f = new File(dir);
         for(File act : f.listFiles()){
-            act.delete();
+            log("Deleting file " + act.getName(), DEBUG_DETAIL);
+            if(!act.delete()){log("WARNING: COULD NOT DELETE " + act.getName(),DEBUG_IMPORTANT);}
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ignored) {}
         }
     }
 
@@ -181,6 +187,7 @@ public class Utils {
     }
 
     public static void runScript(String cmd, File dir) throws IOException {
+        log(cmd,DEBUG_TASKS);
         Process genMetadata = Runtime.getRuntime().exec(
                 cmd, null, dir
         );
@@ -236,5 +243,27 @@ public class Utils {
             }
         }
         return null;
+    }
+
+    public static void copyGEOTIFFProperties(File from, File to) throws IOException {
+        Dataset f = gdal.Open(from.getAbsolutePath());
+        Dataset t = gdal.Open(to.getAbsolutePath());
+
+        log("Cloning geotiff properties: " + from.getName() + " -> " + to.getName(), DEBUG_TASKS);
+//        t.SetGeoTransform(f.GetGeoTransform());
+//        t.SetProjection(f.GetProjection());
+//        t.Close();
+//        f.Close();
+//        t.delete();
+//        f.delete();
+        runScript(
+                NeveAnalyitcs.CONFIG.get("python_dir").getAsString() + " \"" +
+                        Constants.APP_PATH+"\\Metadata.py\" " + from.getAbsolutePath() + " " + to.getAbsolutePath(),
+                from.getParentFile()
+        );
+    }
+
+    public static float interpolate(float v0, float v1, float t) {
+        return (1 - t) * v0 + t * v1;
     }
 }
