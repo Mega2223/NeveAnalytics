@@ -7,10 +7,10 @@ import mil.nga.tiff.util.TiffConstants;
 import net.mega2223.neveanalytics.objects.LandsatBand;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
+import org.gdal.gdalconst.gdalconst;
 
 import java.io.*;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 public class Utils {
@@ -246,21 +246,40 @@ public class Utils {
     }
 
     public static void copyGEOTIFFProperties(File from, File to) throws IOException {
-        Dataset f = gdal.Open(from.getAbsolutePath());
-        Dataset t = gdal.Open(to.getAbsolutePath());
 
         log("Cloning geotiff properties: " + from.getName() + " -> " + to.getName(), DEBUG_TASKS);
-//        t.SetGeoTransform(f.GetGeoTransform());
-//        t.SetProjection(f.GetProjection());
-//        t.Close();
-//        f.Close();
+        Dataset f = gdal.Open(from.getAbsolutePath(), gdalconst.GA_Update);
+        Dataset t = gdal.Open(to.getAbsolutePath(), gdalconst.GA_Update);
+        t.SetGeoTransform(f.GetGeoTransform());
+        t.SetProjection(f.GetProjection());
+        t.SetMetadata(f.GetMetadata_Dict());
+        //f.Close(); t.Close();
+        f.delete();
+        t.delete();
+        try {
+            // Loading the GeoTIFF with NGATIFF may generate an acess violation exception if done just after
+            // the closing of the output stream, therefore for safety reasons it is best to let the process
+            // wait for a while before proceeding
+            Thread.sleep(1000);
+        } catch (InterruptedException g) {
+            throw new RuntimeException(g);
+        }
+        File d = Utils.doRecursiveSearch(from.getName()+".json",from.getParentFile());
+        if(d!=null && d.delete()){
+            Utils.log("Deleted previous data json file",Utils.DEBUG_TASKS);
+        }
+        d = Utils.doRecursiveSearch(from.getName()+".aux.xml",from.getParentFile());
+        if(d!=null && d.delete()){
+            Utils.log("Deleted previous data xml file",Utils.DEBUG_TASKS);
+        }
+
 //        t.delete();
 //        f.delete();
-        runScript(
-                NeveAnalyitcs.CONFIG.get("python_dir").getAsString() + " \"" +
-                        Constants.APP_PATH+"\\Metadata.py\" " + from.getAbsolutePath() + " " + to.getAbsolutePath(),
-                from.getParentFile()
-        );
+//        runScript(
+//                NeveAnalyitcs.CONFIG.get("python_dir").getAsString() + " \"" +
+//                        Constants.APP_PATH+"\\Metadata.py\" " + from.getAbsolutePath() + " " + to.getAbsolutePath(),
+//                from.getParentFile()
+//        );
     }
 
     public static float interpolate(float v0, float v1, float t) {

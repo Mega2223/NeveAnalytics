@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import jdk.jshell.execution.Util;
 import mil.nga.tiff.*;
 import net.mega2223.neveanalytics.Utils;
+import org.gdal.gdal.gdal;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -47,7 +48,6 @@ public class LandsatBand<DataType extends Number> {
             band = info.length > 7 ?  Integer.parseInt(info[7].substring(1,2)) : 0;
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException ignored){band = -1;}
         this.band = band;
-        this.data = getJSON(this);
     }
 
     private LandsatBand(String path, String name, String assossiatedMtlPath, File file, File mtl, int landsatID, int locPath, int locRow, int band, int year, int month, int day, JsonElement data){
@@ -70,12 +70,14 @@ public class LandsatBand<DataType extends Number> {
         if(raster != null && sizeX > 0 && sizeY > 0){return;}
         Utils.log("Loading image " + name + " into memory", Utils.DEBUG_DETAIL);
         Utils.log((cache.size()+1) + " images currently loaded",Utils.DEBUG_VERBOSE);
+        gdal.ClearCredentials();
         image = TiffReader.readTiff(file);
         directories = image.getFileDirectories();
         imgDirectory = directories.get(0);
         raster = imgDirectory.readRasters();
         entries = imgDirectory.getEntries();
         sizeX = (int) imgDirectory.getImageWidth(); sizeY = (int) imgDirectory.getImageHeight();
+        this.data = getJSON(this);
         cache.add(this);
         printCache();
     }
@@ -171,7 +173,7 @@ public class LandsatBand<DataType extends Number> {
         return LoadImage(location+"\\"+name+".TIF");
     }
 
-    static JsonElement getJSON(LandsatBand<?> band){
+    public static JsonElement getJSON(LandsatBand<?> band){
         try {
             return Utils.readJson(fetchJSON(band).getAbsolutePath());
         } catch (FileNotFoundException e) {
@@ -179,7 +181,7 @@ public class LandsatBand<DataType extends Number> {
         }
     }
 
-    static File fetchJSON(LandsatBand<?> band){
+    public static File fetchJSON(LandsatBand<?> band){
         Utils.log("Fetching json for " + band.name, Utils.DEBUG_DETAIL);
         File js = Utils.doRecursiveSearch(
                 band.name + ".json", new File(band.file.getParent())
