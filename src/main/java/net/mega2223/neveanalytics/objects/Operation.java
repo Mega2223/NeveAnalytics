@@ -41,7 +41,6 @@ public abstract class Operation {
                 dir,
                 name,
                 xMax,yMax, (float) 0);
-        Utils.copyGEOTIFFProperties(bandA.file,result.file);
         result.bufferImage();
         for (int x = 0; x < xMax; x++) {
             for (int y = 0; y < yMax; y++) {
@@ -58,6 +57,7 @@ public abstract class Operation {
         if(unbuffer){bandA.discardBuffer(); bandB.discardBuffer();}
         imgCounter++;
         result.save();
+        Utils.copyGEOTIFFProperties(bandA.file,result.file);
         return result;
     }
     static void dos(){}

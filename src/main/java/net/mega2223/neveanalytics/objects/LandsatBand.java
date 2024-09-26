@@ -1,10 +1,12 @@
 package net.mega2223.neveanalytics.objects;
 
 import com.google.gson.JsonElement;
-import jdk.jshell.execution.Util;
+import com.google.gson.JsonParser;
 import mil.nga.tiff.*;
 import net.mega2223.neveanalytics.Utils;
+import org.gdal.gdal.InfoOptions;
 import org.gdal.gdal.gdal;
+import org.gdal.gdalconst.gdalconst;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -12,13 +14,14 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 
 @SuppressWarnings("unused")
 public class LandsatBand<DataType extends Number> {
 
     public static final ArrayList<LandsatBand<?>> cache = new ArrayList<>();
 
-    public final String path, name, assossiatedMtlPath;
+    public final String path, name, nameNoBand, assossiatedMtlPath, processingLevel;
     public final File file, mtl;
     public TIFFImage image = null;
     public final int landsatID, locPath, locRow, band, year, month, day;
@@ -28,9 +31,9 @@ public class LandsatBand<DataType extends Number> {
     public Rasters raster = null;
     public Set<FileDirectoryEntry> entries  = null;
     public JsonElement data;
-    public int noDataValue = 0;
+    public Number noDataValue;
 
-    private LandsatBand(String path) {
+    private LandsatBand(String path) throws IOException {
         this.path = path;
         this.file = new File(path);
         this.name = file.getName();
@@ -38,6 +41,7 @@ public class LandsatBand<DataType extends Number> {
         this.mtl = new File(assossiatedMtlPath);
         String[] info = this.name.split("\\.")[0].split("_");
         landsatID = Integer.parseInt(info[0].substring(2));
+        processingLevel = info[1];
         locPath = Integer.parseInt(info[2].substring(0,3));
         locRow = Integer.parseInt(info[2].substring(3,6));
         year = Integer.parseInt(info[3].substring(0,4));
@@ -48,12 +52,23 @@ public class LandsatBand<DataType extends Number> {
             band = info.length > 7 ?  Integer.parseInt(info[7].substring(1,2)) : 0;
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException ignored){band = -1;}
         this.band = band;
+        this.nameNoBand = this.name.substring(0,40);
+        image = TiffReader.readTiff(file);
+        directories = image.getFileDirectories();
+        imgDirectory = directories.get(0);
+        Object values = imgDirectory.get(FieldTagType.GDAL_NODATA).getValues();
+        if(values instanceof ArrayList<?> ls){
+            noDataValue = Float.parseFloat(ls.get(0).toString());
+        } else {
+            noDataValue = 0.0F;
+        }
     }
 
-    private LandsatBand(String path, String name, String assossiatedMtlPath, File file, File mtl, int landsatID, int locPath, int locRow, int band, int year, int month, int day, JsonElement data){
+    private LandsatBand(String path, String name, String assossiatedMtlPath, String processingLevel, File file, File mtl, int landsatID, int locPath, int locRow, int band, int year, int month, int day, JsonElement data, Number noDataValue){
         this.path = path;
         this.name = name;
         this.assossiatedMtlPath = assossiatedMtlPath;
+        this.processingLevel = processingLevel;
         this.file = file;
         this.mtl = mtl;
         this.landsatID = landsatID;
@@ -64,6 +79,8 @@ public class LandsatBand<DataType extends Number> {
         this.month = month;
         this.day = day;
         this.data = data;
+        this.noDataValue = noDataValue;
+        this.nameNoBand = this.name.substring(0,40);
     }
 
     public void bufferImage() throws IOException {
@@ -106,7 +123,8 @@ public class LandsatBand<DataType extends Number> {
     }
 
     public String getNameNoBand(){
-        return band > 0 ? name.substring(0,name.length() - 7) : name; //TODO
+        //return "LC%02d_".formatted(this.landsatID) + this.processingLevel + "_%02d%02d_%04d%02d%02d".formatted(locPath,locRow,year,month,day);
+        return nameNoBand;
     }
 
     public void save() throws IOException {
@@ -157,7 +175,6 @@ public class LandsatBand<DataType extends Number> {
 
     public static LandsatBand<? extends Number> LoadImage(String path) throws IOException {
         Utils.log("Loading image " + path,Utils.DEBUG_DETAIL);
-        Number n = TiffReader.readTiff(new File(path)).getFileDirectories().get(0).readRasters().getPixel(0, 0)[0];
         return new LandsatBand<>(path);
     }
 
@@ -174,11 +191,23 @@ public class LandsatBand<DataType extends Number> {
     }
 
     public static JsonElement getJSON(LandsatBand<?> band){
+        if(!Utils.isGDALInit){Utils.initGDAL();}
+        Utils.initGDAL();
+        Vector<String> options = new Vector<>();
+        options.add("-json");
+        String info = gdal.GDALInfo(gdal.Open(
+                        band.file.getAbsolutePath(),
+                        gdalconst.GA_ReadOnly),
+                new InfoOptions(options)
+        );
         try {
-            return Utils.readJson(fetchJSON(band).getAbsolutePath());
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            Thread.sleep(1000);
+        } catch (InterruptedException ignored) {
+            Utils.log("WARNING: SLEEP INTERRUPTED, MAY CAUSE ACCESS VIOLATION",Utils.DEBUG_IMPORTANT);
         }
+        return JsonParser.parseString(
+                info
+        );
     }
 
     public static File fetchJSON(LandsatBand<?> band){
@@ -208,6 +237,13 @@ public class LandsatBand<DataType extends Number> {
         return Utils.doRecursiveSearch(
                 band.name + ".json", new File(band.file.getParent())
         );
+    }
+    public static void removeFromCache(File f){
+        for (int i = 0; i < cache.size(); i++) {
+            if(cache.get(i).file.getAbsolutePath().equals(f.getAbsolutePath())){
+                cache.get(i).discardBuffer();
+            }
+        }
     }
 
     public File genPNG(float min, float max, float[] minColor, float[] maxColor, String path) throws IOException {

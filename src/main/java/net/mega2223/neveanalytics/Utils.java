@@ -18,6 +18,8 @@ public class Utils {
     public static final int DEBUG_NOTHING = 0, DEBUG_IMPORTANT = 1, DEBUG_TASKS = 2, DEBUG_DETAIL = 3, DEBUG_VERBOSE = 4;
     public static int DEBUG_LEVEL = 0;
 
+    public static boolean isGDALInit = false;
+
     public static void log(String log, int level){
         if(level <= DEBUG_LEVEL){System.out.println(log);}
     }
@@ -246,8 +248,9 @@ public class Utils {
     }
 
     public static void copyGEOTIFFProperties(File from, File to) throws IOException {
-
         log("Cloning geotiff properties: " + from.getName() + " -> " + to.getName(), DEBUG_TASKS);
+        LandsatBand.removeFromCache(from);
+        LandsatBand.removeFromCache(to);
         Dataset f = gdal.Open(from.getAbsolutePath(), gdalconst.GA_Update);
         Dataset t = gdal.Open(to.getAbsolutePath(), gdalconst.GA_Update);
         t.SetGeoTransform(f.GetGeoTransform());
@@ -264,15 +267,23 @@ public class Utils {
         } catch (InterruptedException g) {
             throw new RuntimeException(g);
         }
-        File d = Utils.doRecursiveSearch(from.getName()+".json",from.getParentFile());
-        if(d!=null && d.delete()){
+        File fromAux = Utils.doRecursiveSearch(from.getName()+".json",from.getParentFile());
+        if(fromAux!=null && fromAux.delete()){
             Utils.log("Deleted previous data json file",Utils.DEBUG_TASKS);
         }
-        d = Utils.doRecursiveSearch(from.getName()+".aux.xml",from.getParentFile());
-        if(d!=null && d.delete()){
+        fromAux = Utils.doRecursiveSearch(from.getName()+".aux.xml",from.getParentFile());
+        if(fromAux!=null && fromAux.delete()){
             Utils.log("Deleted previous data xml file",Utils.DEBUG_TASKS);
         }
 
+        File toAux = Utils.doRecursiveSearch(to.getName()+".json",to.getParentFile());
+        if(toAux!=null && toAux.delete()){
+            Utils.log("Deleted previous data json file",Utils.DEBUG_TASKS);
+        }
+        toAux = Utils.doRecursiveSearch(to.getName()+".aux.xml",to.getParentFile());
+        if(toAux!=null && toAux.delete()){
+            Utils.log("Deleted previous data xml file",Utils.DEBUG_TASKS);
+        }
 //        t.delete();
 //        f.delete();
 //        runScript(
@@ -280,6 +291,15 @@ public class Utils {
 //                        Constants.APP_PATH+"\\Metadata.py\" " + from.getAbsolutePath() + " " + to.getAbsolutePath(),
 //                from.getParentFile()
 //        );
+    }
+
+    public static void initGDAL(){
+        if(isGDALInit){return;}
+        log("INIT_GDAL",DEBUG_IMPORTANT);
+        gdal.AllRegister();
+        gdal.UseExceptions();
+        log("GDAL VERSION INFO: " +gdal.VersionInfo(),DEBUG_IMPORTANT);
+        isGDALInit = true;
     }
 
     public static float interpolate(float v0, float v1, float t) {

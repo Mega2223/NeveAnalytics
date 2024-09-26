@@ -11,9 +11,8 @@ public class NeveAnalyitcs {
     public static void main(String[] args)  {
         Utils.DEBUG_LEVEL = Utils.DEBUG_VERBOSE;
         Utils.clearTemp();
-        while(currentArg < args.length){
+        Utils.initGDAL();
 
-            currentArg++;
-        }
+        //List<>
     }
 }
