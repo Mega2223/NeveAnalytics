@@ -30,7 +30,7 @@ public class BandManager {
 
         for (int x = 0; x < sX; x++) {
             for (int y = 0; y < sY; y++) {
-                int amount = 0;
+                double amount = 0;
                 double sum = 0;
                 for (int i = 0; i < pictures.length; i++) {
                     if(pictures[i].hasDataAt(x,y)){
@@ -42,15 +42,13 @@ public class BandManager {
             }
         }
         count++;
-        for (int i = 0; i < pictures.length; i++) {
-            //pictures[i].discardBuffer();
-            //pictures[i].getMask().discardBuffer();
-        }
 
-        return LandsatBand.genImage(
-                NeveAnalyitcs.CONFIG.get("dest_dir").getAsString()+"\\averages",
-                pictures[0].nameNoBand+"_AVERAGE_" + count,
+        LandsatBand<? extends Number> ret = LandsatBand.genImage(
+                NeveAnalyitcs.CONFIG.get("dest_dir").getAsString() + "\\averages",
+                pictures[0].nameNoBand + "_AVERAGE_" + count,
                 buffer);
+        Utils.copyGEOTIFFProperties(pictures[0].file,ret.file);
+        return ret;
     }
 
     public static JsonElement getJSON(LandsatBand<?> band){

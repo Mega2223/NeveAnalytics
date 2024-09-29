@@ -6,12 +6,14 @@ import mil.nga.tiff.*;
 import mil.nga.tiff.util.TiffConstants;
 import net.mega2223.neveanalytics.objects.LandsatBand;
 import org.gdal.gdal.Dataset;
+import org.gdal.gdal.InfoOptions;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 
 import java.io.*;
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 
 public class Utils {
 
@@ -27,7 +29,7 @@ public class Utils {
     public static void saveTIFF(Number[][] dat, String path, String name) throws IOException {
         final int W = dat.length, H = dat[0].length;
         int format = getFormat(dat[0][0]);
-        FieldType fieldType = FieldType.getFieldType(format,dat[0][0] instanceof Long ? 32 : 16);
+        FieldType fieldType = FieldType.FLOAT;
         int bitsPerSample = fieldType.getBits();
         System.out.println("PROCESSING " + name + ".TIF");
         Rasters img = new Rasters(W, H, 1, fieldType);
@@ -247,7 +249,7 @@ public class Utils {
         return null;
     }
 
-    public static void copyGEOTIFFProperties(File from, File to) throws IOException {
+    public static void copyGEOTIFFProperties(File from, File to) {
         log("Cloning geotiff properties: " + from.getName() + " -> " + to.getName(), DEBUG_TASKS);
         LandsatBand.removeFromCache(from);
         LandsatBand.removeFromCache(to);
@@ -256,6 +258,7 @@ public class Utils {
         t.SetGeoTransform(f.GetGeoTransform());
         t.SetProjection(f.GetProjection());
         t.SetMetadata(f.GetMetadata_Dict());
+        log("INFO:\n"+gdal.GDALInfo(t, new InfoOptions(new Vector<>(List.of("-json")))),DEBUG_VERBOSE);
         //f.Close(); t.Close();
         f.delete();
         t.delete();

@@ -47,9 +47,12 @@ public class Mescla {
             System.out.println("buffering");
             for (int i = 0; i < bandArray.length; i++) {
                 bandArray[i].bufferImage();
+
             }
             System.out.println("bufffered");
-            System.out.println(BandManager.getAverage(bandArray));
+            LandsatBand<?> average = BandManager.getAverage(bandArray);
+            System.out.println(average);
+            if(average!=null){System.exit(0);}
             LandsatBand.clearCache();
         }
 

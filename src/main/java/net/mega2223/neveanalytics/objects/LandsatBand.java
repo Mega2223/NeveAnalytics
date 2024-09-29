@@ -105,7 +105,6 @@ public class LandsatBand<DataType extends Number> {
 
     public void discardBuffer(){
         Utils.log("Unloading image " + name + " from memory", Utils.DEBUG_DETAIL);
-        if(raster != null){throw new RuntimeException("G");}
         if(imgDirectory != null){imgDirectory.setCache(false);}
         image = null; directories = null; imgDirectory = null; raster = null; entries = null;
         cache.remove(this);
@@ -231,7 +230,7 @@ public class LandsatBand<DataType extends Number> {
     public boolean hasDataAt(int x, int y) throws IOException {
         boolean buffered = isBuffered();
         if(!buffered){bufferImage();}
-        boolean ret = this.get(x,y).floatValue() == this.noDataValue.floatValue();
+        boolean ret = this.get(x,y).floatValue() != this.noDataValue.floatValue();
         if(mask!=null){
             boolean mBuffered = mask.isBuffered();
             if(!mBuffered){mask.bufferImage();}
