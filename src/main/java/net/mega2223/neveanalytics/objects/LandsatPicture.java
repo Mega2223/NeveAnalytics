@@ -86,4 +86,17 @@ public class LandsatPicture<DataType extends Number> {
     public List<LandsatBand<DataType>> getBands() {
         return List.copyOf(bands);
     }
+
+    public String getName(){
+        return bands.get(0).nameNoBand;
+    }
+
+    LandsatBand<?> mask = null;
+
+    public void setMask(LandsatBand<?> mask) {
+        this.mask = mask;
+        for(LandsatBand<?> act : bands){
+            act.setMask(mask);
+        }
+    }
 }

@@ -10,4 +10,12 @@ public class TimePeriod {
     public boolean isFromPerdiod(int time){
         return time >= start && time <= end;
     }
+
+    public long getStart() {
+        return start;
+    }
+
+    public long getEnd() {
+        return end;
+    }
 }

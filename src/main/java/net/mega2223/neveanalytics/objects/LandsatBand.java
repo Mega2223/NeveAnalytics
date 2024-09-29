@@ -1,20 +1,18 @@
 package net.mega2223.neveanalytics.objects;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import mil.nga.tiff.*;
+import net.mega2223.neveanalytics.BandManager;
 import net.mega2223.neveanalytics.Utils;
-import org.gdal.gdal.InfoOptions;
 import org.gdal.gdal.gdal;
-import org.gdal.gdalconst.gdalconst;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 @SuppressWarnings("unused")
 public class LandsatBand<DataType extends Number> {
@@ -32,6 +30,8 @@ public class LandsatBand<DataType extends Number> {
     public Set<FileDirectoryEntry> entries  = null;
     public JsonElement data;
     public Number noDataValue;
+
+    LandsatBand<?> mask = null;
 
     private LandsatBand(String path) throws IOException {
         this.path = path;
@@ -62,6 +62,9 @@ public class LandsatBand<DataType extends Number> {
         } else {
             noDataValue = 0.0F;
         }
+        this.discardBuffer();
+        try { Thread.sleep(100);
+        } catch (InterruptedException ignored) {}
     }
 
     private LandsatBand(String path, String name, String assossiatedMtlPath, String processingLevel, File file, File mtl, int landsatID, int locPath, int locRow, int band, int year, int month, int day, JsonElement data, Number noDataValue){
@@ -94,13 +97,15 @@ public class LandsatBand<DataType extends Number> {
         raster = imgDirectory.readRasters();
         entries = imgDirectory.getEntries();
         sizeX = (int) imgDirectory.getImageWidth(); sizeY = (int) imgDirectory.getImageHeight();
-        this.data = getJSON(this);
+        this.data = BandManager.getJSON(this);
         cache.add(this);
         printCache();
+
     }
 
     public void discardBuffer(){
         Utils.log("Unloading image " + name + " from memory", Utils.DEBUG_DETAIL);
+        if(raster != null){throw new RuntimeException("G");}
         if(imgDirectory != null){imgDirectory.setCache(false);}
         image = null; directories = null; imgDirectory = null; raster = null; entries = null;
         cache.remove(this);
@@ -114,7 +119,8 @@ public class LandsatBand<DataType extends Number> {
                 bufferImage();
             } catch (IOException e) {throw new RuntimeException(e);}
         }
-        return (DataType) raster.getPixel(x,y)[0];
+
+        return (DataType) raster.getPixel(Math.min(x,sizeX-1),Math.min(y,sizeY-1))[0];
     }
 
     public boolean isSameImage(LandsatBand<?> image){
@@ -190,60 +196,16 @@ public class LandsatBand<DataType extends Number> {
         return LoadImage(location+"\\"+name+".TIF");
     }
 
-    public static JsonElement getJSON(LandsatBand<?> band){
-        if(!Utils.isGDALInit){Utils.initGDAL();}
-        Utils.initGDAL();
-        Vector<String> options = new Vector<>();
-        options.add("-json");
-        String info = gdal.GDALInfo(gdal.Open(
-                        band.file.getAbsolutePath(),
-                        gdalconst.GA_ReadOnly),
-                new InfoOptions(options)
-        );
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ignored) {
-            Utils.log("WARNING: SLEEP INTERRUPTED, MAY CAUSE ACCESS VIOLATION",Utils.DEBUG_IMPORTANT);
-        }
-        return JsonParser.parseString(
-                info
-        );
-    }
-
-    public static File fetchJSON(LandsatBand<?> band){
-        Utils.log("Fetching json for " + band.name, Utils.DEBUG_DETAIL);
-        File js = Utils.doRecursiveSearch(
-                band.name + ".json", new File(band.file.getParent())
-        );
-        if(js != null){
-            return js;
-        } else {
-            try {
-                // GDAL breaks when I run directly from the runScript,
-                // so I have to create A BATCH FILE with the command and then run said batch file,
-                // this is the most CSS moment ever
-                String cmd = "gdalinfo -stats -nomd -norat -noct -json " + band.file.getAbsolutePath() + ">>" + band.file.getAbsolutePath() + ".json";
-                File f = new File(band.file.getParentFile().getAbsolutePath()+"\\g.bat");
-                f.createNewFile();
-                BufferedWriter w = new BufferedWriter(new FileWriter(f));
-                w.write(cmd);
-                w.close();
-                Utils.runScript(band.file.getParent()+"\\g.bat",band.file.getParentFile());
-                f.delete();
-            } catch (IOException notIgnored) {
-                throw new RuntimeException(notIgnored);
-            }
-        }
-        return Utils.doRecursiveSearch(
-                band.name + ".json", new File(band.file.getParent())
-        );
-    }
     public static void removeFromCache(File f){
         for (int i = 0; i < cache.size(); i++) {
             if(cache.get(i).file.getAbsolutePath().equals(f.getAbsolutePath())){
                 cache.get(i).discardBuffer();
             }
         }
+    }
+
+    public long getTimeEpoch(){
+        return Instant.parse("%04d-%02d-%02dT00:00:00.00Z".formatted(year,month,day)).toEpochMilli();
     }
 
     public File genPNG(float min, float max, float[] minColor, float[] maxColor, String path) throws IOException {
@@ -264,5 +226,31 @@ public class LandsatBand<DataType extends Number> {
         File ret = new File(path);
         ImageIO.write(res,"png", ret);
         return ret;
+    }
+
+    public boolean hasDataAt(int x, int y) throws IOException {
+        boolean buffered = isBuffered();
+        if(!buffered){bufferImage();}
+        boolean ret = this.get(x,y).floatValue() == this.noDataValue.floatValue();
+        if(mask!=null){
+            boolean mBuffered = mask.isBuffered();
+            if(!mBuffered){mask.bufferImage();}
+            ret = ret && mask.hasDataAt(x,y);
+            if(!mBuffered){mask.discardBuffer();}
+        }
+        return ret;
+    }
+
+    public LandsatBand<?> getMask() {
+        return mask;
+    }
+
+    public void setMask(LandsatBand<?> mask) {
+        this.mask = mask;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }
