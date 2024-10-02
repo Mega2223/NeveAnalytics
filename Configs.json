@@ -1,6 +1,7 @@
 {
   "python_dir": "C:\\Users\\Imperiums\\miniconda3\\python.exe",
-  "sources_dir": "C:\\Users\\Imperiums\\Desktop\\menos",
+  "src_dir": "C:\\Users\\Imperiums\\Desktop\\menos",
   "temp_dir": "C:\\Users\\Imperiums\\Desktop\\temp",
-  "dest_dir": "C:\\Users\\Imperiums\\Desktop\\temp\\dest"
+  "dest_dir": "C:\\Users\\Imperiums\\Desktop\\temp\\dest",
+  "shapefile": "C:\\Users\\Imperiums\\Desktop\\Parque Nacional Laguna San Rafael Shapefiles\\Límite_Parque_Nacional_Laguna_San_Rafael_2024.shp"
 }
