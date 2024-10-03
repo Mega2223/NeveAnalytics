@@ -4,8 +4,10 @@ from typing import Tuple
 from osgeo import gdal
 
 
-def getBand(band_name: str) -> int | None:
+def getBand(band_name: str) -> int | str | None:
     ret = band_name.split(".")[0]
+    if ret.__contains__("QA_PIXEL"): return "QA"
+    if ret.__contains__("_NDSI"): return "NDSI"
     ret = ret[len(ret) - 2:len(ret)]
     if ret[1].isnumeric() and ret[0] == "B": return int(ret[1])
     return None
@@ -30,11 +32,11 @@ def doRecursiveSearch(folder: str, filter_function=None) -> list[tuple[str, str]
     return ret
 
 
-def findBandForImage(img: tuple[str, str], band_num: int) -> tuple[str, str] | None:
+def findBandForImage(img: tuple[str, str], band_index: int | str) -> tuple[str, str] | None:
     files = doRecursiveSearch(img[1], isTiffImage)
     name = getNameNoBand(img[0])
     for f in files:
-        if name == getNameNoBand(f[0]) and band_num == getBand(f[0]): return f
+        if name == getNameNoBand(f[0]) and band_index == getBand(f[0]): return f
     return None
 
 

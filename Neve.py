@@ -1,12 +1,8 @@
+import json
 import os
 import subprocess
 
-from osgeo import gdal, ogr
 from osgeo_utils import gdal_calc
-from fmask import fmask
-
-import numpy
-import json
 
 from utils import file_manager, data_utils, misc
 from utils.misc import debug
@@ -22,11 +18,12 @@ dest = config["dest_dir"]
 clones = dest + "\\clones"
 ndsi_folder = dest + "\\NDSI"
 cut_folder = dest + "\\crop"
+mask_folder = dest + "\\masks"
 
 if not os.path.exists(clones): os.mkdir(clones)
 if not os.path.exists(ndsi_folder): os.mkdir(ndsi_folder)
 if not os.path.exists(cut_folder): os.mkdir(cut_folder)
-
+if not os.path.exists(mask_folder): os.mkdir(mask_folder)
 
 band_dirs = file_manager.doRecursiveSearch(root, filter_function=file_manager.isTiffImage)
 
@@ -63,13 +60,21 @@ for b3 in clones:
                        type="Float64"
                        )
 
+pixel_dat = file_manager.doRecursiveSearch(root, filter_function=file_manager.isTiffImage)
+for quality in pixel_dat:
+    if file_manager.getBand(quality[0]) != "QA": continue
+    ndsi = file_manager.findBandForImage(quality,"NDSI")
+    print("Applying mask " + quality[0] + " for " + ndsi[0])
+
 # raster = ogr.Open("C:\\Users\\Imperiums\\Desktop\\Parque Nacional Laguna San Rafael Shapefiles\\Límite_Parque_Nacional_Laguna_San_Rafael_2024.shp")
 
 ndsis = file_manager.doRecursiveSearch(ndsi_folder, filter_function=file_manager.isTiffImage)
 shape = "C:\\Users\\Imperiums\\Desktop\\Parque Nacional Laguna San Rafael Shapefiles\\Límite_Parque_Nacional_Laguna_San_Rafael_2024.shp"
 debug("Cropping images in accordance to provided shapefile")
 for img in ndsis:
-    debug("Cropping " + img[0])
     img_dir = file_manager.imgPath(img)
-    subprocess.call(['gdalwarp', img_dir, cut_folder+"\\"+img[0], '-cutline', shape, '-crop_to_cutline'], stderr=None)
+    img_to = cut_folder + "\\" + img[0]
+    if os.path.exists(img_to): continue
+    debug("Cropping " + img[0])
+    subprocess.call(['gdalwarp', img_dir, img_to, '-cutline', shape, '-crop_to_cutline'], stderr=None)
 
