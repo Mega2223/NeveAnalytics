@@ -2,7 +2,9 @@ import json
 import os
 import subprocess
 
+from osgeo import gdal, ogr
 from osgeo_utils import gdal_calc
+from fmask import fmask
 
 from utils import file_manager, data_utils, misc
 from utils.misc import debug
@@ -15,33 +17,29 @@ config = json.loads(open("Configs.json").read())
 root = config["src_dir"]
 temp = config["temp_dir"]
 dest = config["dest_dir"]
-clones = dest + "\\clones"
 ndsi_folder = dest + "\\NDSI"
 cut_folder = dest + "\\crop"
 mask_folder = dest + "\\masks"
 
-if not os.path.exists(clones): os.mkdir(clones)
+band_dirs = file_manager.doRecursiveSearch(root, filter_function=file_manager.isTiffImage)
+
+clear = True
+# if clear:
+#     try:
+#         os.removedirs(ndsi_folder)
+#         os.removedirs(cut_folder)
+#         os.removedirs(mask_folder)
+#     except FileNotFoundError:
+#         pass
+
 if not os.path.exists(ndsi_folder): os.mkdir(ndsi_folder)
 if not os.path.exists(cut_folder): os.mkdir(cut_folder)
 if not os.path.exists(mask_folder): os.mkdir(mask_folder)
 
-band_dirs = file_manager.doRecursiveSearch(root, filter_function=file_manager.isTiffImage)
+for img in band_dirs:
+    debug("Found image: " + str(img))
 
 for b3 in band_dirs:
-    debug("Loaded image: " + str(b3))
-
-for i in range(0, len(band_dirs)):
-    if os.path.isfile(clones + "\\" + band_dirs[i][0]): continue
-    debug("Converting image " + str(band_dirs[i][0]) + " to float format.")
-    data_utils.convert_to_float(
-        file_manager.imgPath(band_dirs[i]),
-        band_dirs[i][0],
-        clones
-    )
-
-clones = file_manager.doRecursiveSearch(clones, filter_function=file_manager.isTiffImage)
-
-for b3 in clones:
     if file_manager.getBand(b3[0]) == 3:
         b6 = file_manager.findBandForImage(b3, 6)
         name = file_manager.getNameNoBand(b3[0])
@@ -50,11 +48,11 @@ for b3 in clones:
 
         if os.path.isfile(out_file): continue
 
-        gdal_calc.Calc("(A-B)/numpy.maximum(1,numpy.minimum(A,1000000)+numpy.minimum(B,1000000))",
+        gdal_calc.Calc("(A.astype(numpy.float64)-B)/numpy.maximum(1,A.astype(numpy.float64)+B)",
                        A=file_manager.imgPath(b3),
                        B=file_manager.imgPath(b6),
                        outfile=out_file,
-                       NoDataValue=0,
+                       NoDataValue=-10.0,
                        overwrite=True,
                        quiet=True,
                        type="Float64"
@@ -63,8 +61,21 @@ for b3 in clones:
 pixel_dat = file_manager.doRecursiveSearch(root, filter_function=file_manager.isTiffImage)
 for quality in pixel_dat:
     if file_manager.getBand(quality[0]) != "QA": continue
-    ndsi = file_manager.findBandForImage(quality,"NDSI")
+    ndsi = file_manager.findBandForImage(quality,"NDSI",folder=ndsi_folder)
+    out_file = mask_folder + "\\" + file_manager.getNameNoBand(quality[0]) + "_CLOUDMASK.tif"
     print("Applying mask " + quality[0] + " for " + ndsi[0])
+    if os.path.isfile(out_file): continue
+    # 22280 24088 24216 24344 24472 55052
+    # ((B==22280)+(B==24088)+(B==24216)+(B==24344)+(B==24472)+(B==55052))
+    gdal_calc.Calc("A*(1-((B==22280)+(B==24088)+(B==24216)+(B==24344)+(B==24472)+(B==55052)))",
+                   A=file_manager.imgPath(ndsi),
+                   B=file_manager.imgPath(quality),
+                   outfile=out_file,
+                   NoDataValue=-10.0,
+                   overwrite=True,
+                   quiet=True
+                   )
+
 
 # raster = ogr.Open("C:\\Users\\Imperiums\\Desktop\\Parque Nacional Laguna San Rafael Shapefiles\\Límite_Parque_Nacional_Laguna_San_Rafael_2024.shp")
 

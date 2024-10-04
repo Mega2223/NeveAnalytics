@@ -6,8 +6,8 @@ from osgeo import gdal
 
 def getBand(band_name: str) -> int | str | None:
     ret = band_name.split(".")[0]
-    if ret.__contains__("QA_PIXEL"): return "QA"
-    if ret.__contains__("_NDSI"): return "NDSI"
+    if "QA_PIXEL" in band_name: return "QA"
+    if "NDSI" in band_name: return "NDSI"
     ret = ret[len(ret) - 2:len(ret)]
     if ret[1].isnumeric() and ret[0] == "B": return int(ret[1])
     return None
@@ -32,11 +32,14 @@ def doRecursiveSearch(folder: str, filter_function=None) -> list[tuple[str, str]
     return ret
 
 
-def findBandForImage(img: tuple[str, str], band_index: int | str) -> tuple[str, str] | None:
-    files = doRecursiveSearch(img[1], isTiffImage)
+def findBandForImage(img: tuple[str, str], band_index: int | str, folder = None) -> tuple[str, str] | None:
+    if folder is None: folder = img[1]
+    files = doRecursiveSearch(folder, isTiffImage)
     name = getNameNoBand(img[0])
     for f in files:
-        if name == getNameNoBand(f[0]) and band_index == getBand(f[0]): return f
+        band = getBand(f[0])
+        # print(f[0] + " -> " + str(band))
+        if name == getNameNoBand(f[0]) and band_index == band: return f
     return None
 
 
