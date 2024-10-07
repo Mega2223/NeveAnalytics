@@ -7,7 +7,7 @@ from osgeo import gdal, ogr
 from osgeo_utils import gdal_calc
 from fmask import fmask
 
-from utils import file_manager, data_utils, misc
+from utils import file_manager, data_utils, misc, calculator
 from utils.calculator import calcNDSI, applyCloudMask, cropToShapefile
 from utils.misc import debug
 
@@ -80,7 +80,7 @@ cropped_ndsis = file_manager.doRecursiveSearch(cropped_folder, filter_function=f
 
 for year in range(1980, 2025, 1):
     debug("Finding images for the year " + str(year))
-    imgs_for_year = []
+    imgs_for_year: list[tuple[str,str]] = []
     begin = datetime.date(year,1,1)
     end = datetime.date(year,12,31)
     for img in cropped_ndsis:
@@ -88,4 +88,9 @@ for year in range(1980, 2025, 1):
             imgs_for_year.append(img)
             print("found " + img[0])
 
-    debug("found" + str(len(imgs_for_year)) + "images")
+    img_count = len(imgs_for_year)
+    debug("found " + str(img_count) + " images for this year")
+    if len(imgs_for_year) > 0:
+        debug("creating mosaic")
+        dest_file = mosaic_folder + "\\" + file_manager.getNameNoBand(imgs_for_year[0][0]) + "_MOSAIC.tif"
+        calculator.genMosaic(imgs_for_year, dest_file)

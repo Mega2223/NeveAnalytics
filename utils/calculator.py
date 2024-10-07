@@ -1,6 +1,7 @@
 import subprocess
 
 from osgeo_utils import gdal_calc
+from osgeo_utils import gdal_merge
 
 from utils import file_manager
 
@@ -32,7 +33,9 @@ def cropToShapefile(img_from, img_to, shape):
     subprocess.call(['gdalwarp', img_from, img_to, '-cutline', shape, '-crop_to_cutline'], stderr=None)
 
 
-def genMosaic(imgs: list[str], img_to: str):
-    args = imgs.copy()
-    args = ("gdal_merge -o" + img_to + "-n 0").split(" ") + args
+def genMosaic(imgs: list[tuple[str, str]], img_to: str):
+    args = []
+    for i in imgs: args.append(i[1] + "\\" +i[0])
+    gdal_merge.main(['', '-o', img_to] + args)
+    print(args)
     subprocess.call(args, stderr=None)
