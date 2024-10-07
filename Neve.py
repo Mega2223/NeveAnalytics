@@ -91,6 +91,13 @@ for year in range(1980, 2025, 1):
     img_count = len(imgs_for_year)
     debug("found " + str(img_count) + " images for this year")
     if len(imgs_for_year) > 0:
-        debug("creating mosaic")
         dest_file = mosaic_folder + "\\" + file_manager.getNameNoBand(imgs_for_year[0][0]) + "_MOSAIC.tif"
+        if os.path.exists(dest_file): continue
+        debug("creating mosaic")
         calculator.genMosaic(imgs_for_year, dest_file)
+
+mosaics = file_manager.doRecursiveSearch(mosaic_folder, filter_function=file_manager.isTiffImage)
+for m in mosaics:
+    print(
+        gdal.Info(m[1]+"\\"+m[0],options=gdal.InfoOptions("-json"))
+    )

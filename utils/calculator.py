@@ -38,4 +38,3 @@ def genMosaic(imgs: list[tuple[str, str]], img_to: str):
     for i in imgs: args.append(i[1] + "\\" +i[0])
     gdal_merge.main(['', '-o', img_to] + args)
     print(args)
-    subprocess.call(args, stderr=None)
