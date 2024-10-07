@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 import subprocess
@@ -7,6 +8,7 @@ from osgeo_utils import gdal_calc
 from fmask import fmask
 
 from utils import file_manager, data_utils, misc
+from utils.calculator import calcNDSI, applyCloudMask, cropToShapefile
 from utils.misc import debug
 
 print("Olá mundo :)")
@@ -17,9 +19,12 @@ config = json.loads(open("Configs.json").read())
 root = config["src_dir"]
 temp = config["temp_dir"]
 dest = config["dest_dir"]
+
 ndsi_folder = dest + "\\NDSI"
-cut_folder = dest + "\\crop"
+cropped_folder = dest + "\\crop"
 mask_folder = dest + "\\masks"
+mosaic_folder = dest + "\\mosaics"
+yearly_averages = dest + "\\yearly_averages"
 
 band_dirs = file_manager.doRecursiveSearch(root, filter_function=file_manager.isTiffImage)
 
@@ -33,30 +38,22 @@ clear = True
 #         pass
 
 if not os.path.exists(ndsi_folder): os.mkdir(ndsi_folder)
-if not os.path.exists(cut_folder): os.mkdir(cut_folder)
+if not os.path.exists(cropped_folder): os.mkdir(cropped_folder)
 if not os.path.exists(mask_folder): os.mkdir(mask_folder)
+if not os.path.exists(mosaic_folder): os.mkdir(mosaic_folder)
+if not os.path.exists(yearly_averages): os.mkdir(yearly_averages)
 
 for img in band_dirs:
     debug("Found image: " + str(img))
 
-for b3 in band_dirs:
-    if file_manager.getBand(b3[0]) == 3:
-        b6 = file_manager.findBandForImage(b3, 6)
-        name = file_manager.getNameNoBand(b3[0])
-        print("calculating NDSI for " + b3[0] + " and " + b6[0])
+for thermal in band_dirs:
+    if file_manager.getBand(thermal[0]) == 3:
+        green = file_manager.findBandForImage(thermal, 6)
+        name = file_manager.getNameNoBand(thermal[0])
+        print("calculating NDSI for " + thermal[0] + " and " + green[0])
         out_file = ndsi_folder + "\\" + name + "_NDSI.tif"
-
         if os.path.isfile(out_file): continue
-
-        gdal_calc.Calc("(A.astype(numpy.float64)-B)/numpy.maximum(1,A.astype(numpy.float64)+B)",
-                       A=file_manager.imgPath(b3),
-                       B=file_manager.imgPath(b6),
-                       outfile=out_file,
-                       NoDataValue=-10.0,
-                       overwrite=True,
-                       quiet=True,
-                       type="Float64"
-                       )
+        calcNDSI(thermal,green,out_file)
 
 pixel_dat = file_manager.doRecursiveSearch(root, filter_function=file_manager.isTiffImage)
 for quality in pixel_dat:
@@ -65,27 +62,30 @@ for quality in pixel_dat:
     out_file = mask_folder + "\\" + file_manager.getNameNoBand(quality[0]) + "_CLOUDMASK.tif"
     print("Applying mask " + quality[0] + " for " + ndsi[0])
     if os.path.isfile(out_file): continue
-    # 22280 24088 24216 24344 24472 55052
-    # ((B==22280)+(B==24088)+(B==24216)+(B==24344)+(B==24472)+(B==55052))
-    gdal_calc.Calc("A*(1-((B==22280)+(B==24088)+(B==24216)+(B==24344)+(B==24472)+(B==55052)))",
-                   A=file_manager.imgPath(ndsi),
-                   B=file_manager.imgPath(quality),
-                   outfile=out_file,
-                   NoDataValue=-10.0,
-                   overwrite=True,
-                   quiet=True
-                   )
-
-
+    applyCloudMask(ndsi,quality,out_file)
 # raster = ogr.Open("C:\\Users\\Imperiums\\Desktop\\Parque Nacional Laguna San Rafael Shapefiles\\Límite_Parque_Nacional_Laguna_San_Rafael_2024.shp")
 
 ndsis = file_manager.doRecursiveSearch(ndsi_folder, filter_function=file_manager.isTiffImage)
 shape = "C:\\Users\\Imperiums\\Desktop\\Parque Nacional Laguna San Rafael Shapefiles\\Límite_Parque_Nacional_Laguna_San_Rafael_2024.shp"
 debug("Cropping images in accordance to provided shapefile")
+
 for img in ndsis:
     img_dir = file_manager.imgPath(img)
-    img_to = cut_folder + "\\" + img[0]
+    img_to = cropped_folder + "\\" + img[0]
     if os.path.exists(img_to): continue
     debug("Cropping " + img[0])
-    subprocess.call(['gdalwarp', img_dir, img_to, '-cutline', shape, '-crop_to_cutline'], stderr=None)
+    cropToShapefile(img_dir,img_to,shape)
 
+cropped_ndsis = file_manager.doRecursiveSearch(cropped_folder, filter_function=file_manager.isTiffImage)
+
+for year in range(1980, 2025, 1):
+    debug("Finding images for the year " + str(year))
+    imgs_for_year = []
+    begin = datetime.date(year,1,1)
+    end = datetime.date(year,12,31)
+    for img in cropped_ndsis:
+        if file_manager.isFromTimePeriod(img[0], begin, end):
+            imgs_for_year.append(img)
+            print("found " + img[0])
+
+    debug("found" + str(len(imgs_for_year)) + "images")

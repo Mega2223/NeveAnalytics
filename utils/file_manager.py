@@ -1,5 +1,6 @@
-import os
+import os, datetime
 from typing import Tuple
+
 
 from osgeo import gdal
 
@@ -49,3 +50,7 @@ def loadBand(img: tuple[str, str]) -> gdal.Dataset | None:
 
 def imgPath(img: tuple[str,str]):
     return img[1] + "\\" + img[0]
+
+def isFromTimePeriod(img_name: str, min: datetime.date, max: datetime.date) -> bool:
+    date = datetime.date(int(img_name[17:21]), int(img_name[21:23]), int(img_name[23:25]))
+    return isTiffImage(img_name) and (min <= date <= max)
