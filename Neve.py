@@ -27,6 +27,16 @@ mask_folder = dest + "\\masks"
 yearly_averages = dest + "\\yearly_averages"
 monthly_averages = dest + "\\monthly_averages"
 
+
+possible_images = file_manager.doRecursiveSearch(root, filter_function=file_manager.isTiffImage)
+for img in possible_images:
+    if '(' in img[0]:
+        split = img[0].split('.')
+        oldname = img[1]+"\\"+img[0]
+        newname = split[0][0:len(split[0])-4]+"."+split[1]
+        print("Renaming " + oldname + " --> " + newname)
+        os.rename(oldname,newname)
+
 band_dirs = file_manager.doRecursiveSearch(root, filter_function=file_manager.isTiffImage)
 
 # clear = True
