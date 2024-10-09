@@ -22,7 +22,7 @@ def applyCloudMask(ndsi, quality, out_file):
                    A=file_manager.imgPath(ndsi),
                    B=file_manager.imgPath(quality),
                    outfile=out_file,
-                   NoDataValue=-2.0,
+                   NoDataValue=-0.0,
                    overwrite=True,
                    quiet=True
                    )
@@ -44,5 +44,5 @@ def mosaicAndShape(imgs: list[tuple[str, str]], img_to: str, shapefile: str):
     args = []
     print("generating mosaic " + img_to)
     for i in imgs: args.append(i[1] + "\\" + i[0])
-    subprocess.call(['gdalwarp','-cutline',shapefile,'-r','average','-q'] + args + [img_to], stderr=None)
+    subprocess.call(['gdalwarp','-cutline',shapefile,'-crop_to_cutline','-r','average','-q'] + args + [img_to], stderr=None)
     print(args)
