@@ -1,7 +1,6 @@
 import subprocess
 
 from osgeo_utils import gdal_calc
-from osgeo_utils import gdal_merge
 
 from utils import file_manager
 
@@ -23,18 +22,27 @@ def applyCloudMask(ndsi, quality, out_file):
                    A=file_manager.imgPath(ndsi),
                    B=file_manager.imgPath(quality),
                    outfile=out_file,
-                   NoDataValue=0.0,
+                   NoDataValue=-2.0,
                    overwrite=True,
                    quiet=True
                    )
 
 
 def cropToShapefile(img_from, img_to, shape):
-    subprocess.call(['gdalwarp', img_from, img_to, '-cutline', shape, '-crop_to_cutline'], stderr=None)
+    print("Cropping " + img_from + " -> (" + shape + ") -> " + img_to)
+    subprocess.call(['gdalwarp', img_from, img_to, '-cutline', shape, '-crop_to_cutline', '-q'], stderr=None)
 
 
 def genMosaic(imgs: list[tuple[str, str]], img_to: str):
     args = []
-    for i in imgs: args.append(i[1] + "\\" +i[0])
-    gdal_merge.main(['', '-o', img_to] + args)
+    for i in imgs: args.append(i[1] + "\\" + i[0])
+    # gdal_merge.main(['','', '-o', img_to] + args)
+    subprocess.call(['gdalwarp','-r','average'] + args + [img_to], stderr=None)
+
+
+def mosaicAndShape(imgs: list[tuple[str, str]], img_to: str, shapefile: str):
+    args = []
+    print("generating mosaic " + img_to)
+    for i in imgs: args.append(i[1] + "\\" + i[0])
+    subprocess.call(['gdalwarp','-cutline',shapefile,'-r','average','-q'] + args + [img_to], stderr=None)
     print(args)
