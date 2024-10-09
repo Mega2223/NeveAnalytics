@@ -35,6 +35,7 @@ for img in possible_images:
         oldname = img[1]+"\\"+img[0]
         newname = split[0][0:len(split[0])-4]+"."+split[1]
         print("Renaming " + oldname + " --> " + newname)
+        newname = img[1] + "\\" + newname
         os.rename(oldname,newname)
 
 band_dirs = file_manager.doRecursiveSearch(root, filter_function=file_manager.isTiffImage)
