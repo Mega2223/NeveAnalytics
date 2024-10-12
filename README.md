@@ -42,14 +42,14 @@ Divide os arquivos em uma hierarquia de pastas
 ### NDSICalculator.java
 Entra nos diretórios, procura os pares de raster e calcula e salva o índice NDSI para cada um, a imagem resultante é salva
 
-### StatsReportGenerator.java
+### Misc.java
 Calcula a área coberta por neve conforme a especificação e gera os dados necessários para a compilação dos dados
 
 ### Metadata.py
 Extrai os metadados dos arquivos de LANDSAT brutos para as imagens geradas pela aplicação, caso seja necessário as colocar em algum software de geoprocessamento.
 
 ### Plot.py
-Plotta os dados conforme a última run do StatsReportGenerator
+Plotta os dados conforme a última run do Misc
 
 ## Parâmetros adicionais
 - `--save-png`: Além de salvar os arquivos TIFF, também são salvas imagens PNG representando o NDSI.

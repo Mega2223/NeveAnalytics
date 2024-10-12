@@ -1,24 +1,19 @@
-package src.main.java.net.mega2223.neveanalytics.legacy.standalonescripts;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import mil.nga.tiff.Rasters;
-import net.mega2223.neveanalytics.legacy.Constants;
-import net.mega2223.neveanalytics.legacy.Utils;
-import net.mega2223.neveanalytics.legacy.objects.LandsatImage;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class StatsReportGenerator {
+public class Misc {
     public static float SNOW_THRESHOLD = .5F;
 
     public static void main(String[] args) throws IOException {
         System.out.println("Generating report");
         int snowPixels;
-        File folder = new File(Constants.DATA_PATH+"\\NDSI");
+        File folder = new File("C:\\Users\\Imperiums\\Desktop\\Earthering my engines");
         File[] files = folder.listFiles();
         for (int i = 0; i < files.length; i++) {
             String[] act = files[i].getName().split("\\.");
