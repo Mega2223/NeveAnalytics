@@ -71,6 +71,7 @@ plt.gca().get_yaxis().set_major_formatter(ticker.StrMethodFormatter("{x:.2f}"))#
 plt.gca().yaxis.major.formatter._useMathText = True
 
 plt.gcf().autofmt_xdate()
+plt.tight_layout()
 plt.show()
 
 print(xpoints)
