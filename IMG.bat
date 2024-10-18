@@ -1,0 +1,1 @@
+for %%f in (*.TIF) do gdal_translate -of PNG -scale 0 1 0 255 -b 1 -b 1 -b 1 %%f %%f.png
