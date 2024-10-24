@@ -19,7 +19,8 @@ ypoints = []
 
 for f in read:
     area = int(f.split(":")[1])
-    year = int(f[0:4])
+    print(f[10:14])
+    year = int(f[10:14])
     # print("year",year)
     if year < 1998: continue
     print(f[0], area)
@@ -27,7 +28,7 @@ for f in read:
     xpoints_epoch.append(
         int(
             calendar.timegm(
-                datetime.datetime(year, 1, 1, 0, 0, 0).timetuple()
+                datetime.datetime(year, 6, 15, 0, 0, 0).timetuple()
             )
         )
     )
@@ -48,7 +49,7 @@ z = np.polyfit(xpoints_epoch, ypoints, 1)
 p = np.poly1d(z)
 
 plt.scatter(xpoints, ypoints)
-plt.plot(xpoints, p(xpoints_epoch),color='red')
+plt.plot(xpoints, p(xpoints_epoch),color='blue')
 
 plt.gca().get_yaxis().set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))#*10⁵
 plt.gca().yaxis.major.formatter._useMathText = True

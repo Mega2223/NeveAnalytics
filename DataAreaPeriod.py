@@ -11,35 +11,54 @@ import json
 
 
 read = open('AreaPeriod.txt').read().split("\n")
-print(read)
+# print(read)
 
 
-col = ['blue','green','orange']
-for m in range(0,12,4):
+col = ['blue','green','orange','red']
+stations = {
+    "summer":[-1, 12, 21, 0, 3, 20],
+    "fall":[0, 3, 21, 0, 6, 20],
+    "winter":[0, 6, 21, 0, 9, 22],
+    "spring":[0, 9, 23, 0, 12, 20]
+}
+stations = [stations["summer"], stations["fall"], stations["winter"], stations["spring"]]
+
+for m in range(0,4):
     xpoints = []
     xpoints_epoch = []
     ypoints = []
     for f in read:
+        if not ':' in f: continue
         area = int(f.split(":")[1])
-        year = int(f[5:9])
-        month = int(f[10:12])
-        print("year",year,"month",month)
-        if year < 1998 or month < m or month > m+4: continue
-        print(f[0], area)
+        print(f)
+        print('0123456789012345678901234567890123456789')
+        ystart, mstart, dstart, yend, mend, dend = int(f[10:14]), int(f[15:17]), int(f[18:20]), int(f[24:28]), int(f[29:31]), int(f[32:34])
+        print(ystart,mstart,dstart,"->",yend,mend,dend)
+        start = datetime.date(ystart, mstart, dstart)
+        end = datetime.date(yend, mend, dend)
+        middle = (start + 0.5*(end-start))
+
+        station_min = datetime.date(stations[m][0]+end.year,stations[m][1],stations[m][2])
+        station_max =  datetime.date(stations[m][3]+end.year,stations[m][4],stations[m][5])
+        print('station',str(station_min),str(station_max))
+        print("year",start.year,"month",start.month,"day",start.day,"-> year",end.year,"month",end.month,"day",end.day )
+        if start.year < 1998 or middle < station_min or middle > station_max: continue
         ypoints.append(area/100000)
         xpoints_epoch.append(
             int(
                 calendar.timegm(
-                    datetime.datetime(year, 1, 1, 0, 0, 0).timetuple()
+                    middle.timetuple()
                 )
             )
         )
-        xpoints.append(year)
+        xpoints.append(
+           start.year + start.month / 12 + start.day / 30.5
+        )
 
     ypoints = np.array(ypoints)
     # plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
 
-    plt.title("Cobertura de neve na área de estudo por quadrimestre.")
+    plt.title("Cobertura de neve na área de estudo por estação.")
     # plt.title("NDSI médio na área de estudo")
     plt.xlabel("Data")
     plt.ylabel("Área coberta (KM²)")
@@ -50,8 +69,8 @@ for m in range(0,12,4):
     z = np.polyfit(xpoints_epoch, ypoints, 1)
     p = np.poly1d(z)
 
-    plt.scatter(xpoints, ypoints,color=col[int(m/4)])
-    plt.plot(xpoints, p(xpoints_epoch),color=col[int(m/4)])
+    plt.scatter(xpoints, ypoints,color=col[int(m)])
+    plt.plot(xpoints, p(xpoints_epoch),color=col[int(m)])
 
     plt.gca().get_yaxis().set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))#*10⁵
     plt.gca().yaxis.major.formatter._useMathText = True
