@@ -29,3 +29,5 @@ Embora o código tenha sido inteiramente por [mim](http://lattes.cnpq.br/1515250
 - [Dra. Fernanda Casagrande](http://lattes.cnpq.br/9240753968751215) (INPE / DIMNT)
 
 # Licença
+
+O projeto está sobre a Mozilla Public License (MPL), que é uma licença copyleft.
