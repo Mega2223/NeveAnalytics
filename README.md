@@ -21,8 +21,8 @@ Onde $BI$ é a Banda Infravermelho Próximo 1 e $BV$ é a Banda Verde.
 
 # Contribuições
 
-Embora o código tenha sido inteiramente por mim, houveram contribuições adicionais para este trabalho
-- Dr. Victor Fernandez Nascimento (UFABC / LABGRIs)
-- Dra. Fernanda Casagrande (INPE / DIMNT)
+Embora o código tenha sido inteiramente por [mim](http://lattes.cnpq.br/1515250772926471), houveram contribuições adicionais para este trabalho
+- [Dr. Victor Fernandez Nascimento](http://lattes.cnpq.br/3373815361504494) (UFABC / LABGRIs)
+- [Dra. Fernanda Casagrande](http://lattes.cnpq.br/9240753968751215) (INPE / DIMNT)
 
 # Licença
