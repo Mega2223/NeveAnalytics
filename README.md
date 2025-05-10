@@ -4,6 +4,9 @@ Aplicação que eu fiz para o o meu artigo [ANÁLISE ESPAÇO-TEMPORAL DA COBERTU
 
 A aplicação calcula o nível de neve em uma determinada região com o uso do NDSI (Normalized Difference Snow Index). A ideia é ela ser facilmente modificável para outros propositos de análise de dados de raster.
 
+## Fluxograma
+![Diagrama](https://github.com/user-attachments/assets/13a91d42-bf1e-4e2c-8899-4a49be11b4d9)
+
 # Coleção de dados
 
 Os dados são coletados com base no filtro do EarthEngine, são pegas as imagens que cumprem o seguinte critério
