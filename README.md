@@ -4,10 +4,19 @@ Aplicação que eu fiz para o o meu artigo [ANÁLISE ESPAÇO-TEMPORAL DA COBERTU
 
 A aplicação calcula o nível de neve em uma determinada região com o uso do NDSI (Normalized Difference Snow Index). A ideia é ela ser facilmente modificável para outros propositos de análise de dados de raster.
 
-
-
 # Coleção de dados
 
+Os dados são coletados com base no filtro do EarthEngine, são pegas as imagens que cumprem o seguinte critério
+- São imagens LANDSAT 6, 7, 8 ou 9
+- Estão no intervalo temporal especificado
+- Cobrem a área de estudo
+
 # Cálculo do NDSI
+
+O Normalized Difference Snow Index é um indice que mede a probabilidade de um determinado pixel estar coberto por neve, ele se dá por  
+
+$\Huge \frac{BV-BI}{BV+BI}$   
+
+Onde $BI$ é a Banda Infravermelho Próximo 1 e $BV$ é a Banda Verde.
 
 # Licença
