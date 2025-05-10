@@ -19,4 +19,10 @@ $\Huge \frac{BV-BI}{BV+BI}$
 
 Onde $BI$ é a Banda Infravermelho Próximo 1 e $BV$ é a Banda Verde.
 
+# Contribuições
+
+Embora o código tenha sido inteiramente por mim, houveram contribuições adicionais para este trabalho
+- Dr. Victor Fernandez Nascimento (UFABC / LABGRIs)
+- Dra. Fernanda Casagrande (INPE / DIMNT)
+
 # Licença
